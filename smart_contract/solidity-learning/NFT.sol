@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 contract NFT is ERC721URIStorage{
     uint256 public tokenCounter; // id of current 
 
-    constructor() ERC721("MyNiggeNFT", "Nigga") {
+    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
     }
 

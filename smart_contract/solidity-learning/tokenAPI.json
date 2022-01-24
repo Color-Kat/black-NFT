@@ -1,0 +1,8 @@
+{
+    "name": "My first NFT",    
+    "description": "NFT json to some testing",    
+    "image": "https://sun9-27.userapi.com/impf/PKIOoVEvZliX1PNe9Ptz6WCBYZUkJoPFhi5rqw/XkFeQogIdj8.jpg?size=795x265&quality=95&crop=0,0,1590,530&sign=d96c5dc9032dd850942bdf9b99a91e87&type=cover_group",    
+    "attributes": {
+        "rarity": 100
+    }
+}
