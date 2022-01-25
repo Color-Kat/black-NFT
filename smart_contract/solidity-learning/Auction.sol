@@ -11,11 +11,14 @@ contract AuctionBox {
 
     // add to auctions array new Auction instance
     function createAuction(
-        string memory title,
-        uint startPrice,
-        string memory description
+        string memory _title,
+        string memory _description,
+        uint256 _startPrice,
+        uint256 _duration //time when auction will be closed
     ) public {
+        Auction newAuction = new Auction(payable(msg.sender), _title, _description, _startPrice, _duration);
 
+        auctions.push(newAuction);
     }
 
     // just return our auctions array
@@ -26,11 +29,11 @@ contract AuctionBox {
 
 contract Auction {
     address payable private owner;
-    string title;
-    uint256 startPrice;
-    uint256 startTime; // now - time when auction created
-    uint256 endTime; //time when auction will be closed
-    string descriprion;
+    string public title;
+    uint256 public startPrice;
+    // uint256 public startTime; // block.timestamp - time when auction created
+    uint256 public endTime; //time when auction will be closed
+    string public descriprion;
 
     // create enum type of auction states
     enum State{Running, Finallized}
@@ -42,8 +45,21 @@ contract Auction {
     address payable public highestBidder;
 
     // bids list
-    mapping(address => uint256) bids;
+    mapping(address => uint256) public bids;
 
+    constructor(
+        address payable _owner,
+        string memory _title,
+        string memory _description,
+        uint256 _startPrice,
+        uint256 _duration
+    ) {
+        owner = _owner;
+        title = _title;
+        descriprion = _description;
+        startPrice = _startPrice;
+        endTime = block.timestamp + _duration; // count end date (now + auction duration)
+    }
 }
 
 contract NFT is ERC721URIStorage{
