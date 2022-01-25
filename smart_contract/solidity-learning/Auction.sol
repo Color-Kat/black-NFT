@@ -5,6 +5,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
+struct AuctionContent {
+    address owner;
+    string title;
+    string description;
+    uint256 startPrice;
+    uint256 endTime;
+}
+
 contract AuctionBox{
     // auctions array
     Auction[] public auctions;
@@ -33,7 +41,7 @@ contract AuctionBox{
     }
 
     // return content of auction by id
-    function getDescription(uint256 _id) public view returns (string memory) {
+    function getContent(uint256 _id) public view returns (AuctionContent memory) {
         return auctions[_id].getContent();
         // (, , string memory description, ,) = auctions[_id].getContent();
         // return description;
@@ -80,15 +88,10 @@ contract Auction {
         return title;
     }
 
-    // return tuple of fields this auction
-    function getContent() public view returns (
-        address, // owner
-        string memory, // title
-        string memory, // descr
-        uint256, // startPrice
-        uint256 // endTime
-    ) {
-        return (
+    
+    // return structure of fields this auction
+    function getContent() public view returns (AuctionContent memory) {
+        return AuctionContent(
             owner,
             title,
             descriprion,
@@ -96,6 +99,23 @@ contract Auction {
             endTime
         );
     }
+
+    // // return tuple of fields this auction
+    // function getContent() public view returns (
+    //     address, // owner
+    //     string memory, // title
+    //     string memory, // descr
+    //     uint256, // startPrice
+    //     uint256 // endTime
+    // ) {
+    //     return (
+    //         owner,
+    //         title,
+    //         descriprion,
+    //         startPrice,
+    //         endTime
+    //     );
+    // }
 }
 
 contract NFT is ERC721URIStorage{
