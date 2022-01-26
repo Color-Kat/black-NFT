@@ -9,6 +9,7 @@ struct AuctionContent {
     address owner;
     string title;
     string description;
+    uint256 nftTokenId;
     uint256 startPrice;
     uint256 endTime;
 }
@@ -24,11 +25,12 @@ contract AuctionBox{
     function createAuction(
         string memory _title,
         string memory _description,
+        string memory _tokenURI,
         uint256 _startPrice,
         uint256 _duration //time when auction will be closed
     ) public {
         // create new Auction instance
-        Auction newAuction = new Auction(payable(msg.sender), _title, _description, _startPrice, _duration);
+        Auction newAuction = new Auction(payable(msg.sender), _title, _description, _tokenURI, _startPrice, _duration);
 
         emit AuctionCreated(newAuction);
 
@@ -40,11 +42,17 @@ contract AuctionBox{
         return auctions;
     }
 
+    function getAuctionById(uint256 _id) public view returns (Auction) {
+        return auctions[_id];
+    }
+
+    function getAuctionNFTById(uint256 _id) public view returns (Auction) {
+        return auctions[_id].tokenURI;
+    }
+
     // return content of auction by id
     function getContent(uint256 _id) public view returns (AuctionContent memory) {
         return auctions[_id].getContent();
-        // (, , string memory description, ,) = auctions[_id].getContent();
-        // return description;
     }
 }
 
@@ -55,6 +63,7 @@ contract Auction {
     // uint256 public startTime; // block.timestamp - time when auction created
     uint256 public endTime; //time when auction will be closed
     string public descriprion;
+    NFT public product;
 
     // create enum type of auction states
     enum State{Running, Finallized}
@@ -68,10 +77,14 @@ contract Auction {
     // bids list
     mapping(address => uint256) public bids;
 
+    // id of generated nft token;
+    uint256 public nftTokenId;
+
     constructor(
         address payable _owner,
         string memory _title,
         string memory _description,
+        string memory _tokenURI,
         uint256 _startPrice,
         uint256 _duration
     ) {
@@ -81,13 +94,16 @@ contract Auction {
         descriprion = _description;
         startPrice = _startPrice;
         endTime = block.timestamp + _duration; // count end date (now + auction duration)
+
+        // create new NFT product
+        NFT nft = new NFT();
+        nftTokenId = nft.mintNFT(_tokenURI);
     }
 
     // just return title of this auction
     function getTitle() public view returns(string memory) {
         return title;
     }
-
     
     // return structure of fields this auction
     function getContent() public view returns (AuctionContent memory) {
@@ -95,6 +111,7 @@ contract Auction {
             owner,
             title,
             descriprion,
+            nftTokenId,
             startPrice,
             endTime
         );
@@ -121,9 +138,14 @@ contract Auction {
 contract NFT is ERC721URIStorage{
     uint256 public tokenCounter; // id of current 
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
+    constructor() ERC721("NiggaNFT", "Nigga") {
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
     }
+
+    //  constructor(string memory name, string memory symbol) ERC721(name, symbol) {
+    //     tokenCounter = 0; // count of NFT equals 0 when we deploy contract
+    // }
+
 
     function mintNFT(string memory tokenURI) public returns (uint256){
         uint256 newItemId = tokenCounter;
