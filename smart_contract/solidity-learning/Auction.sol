@@ -35,7 +35,7 @@ contract AuctionBox{
 
         emit AuctionCreated(newAuction);
 
-        emit Log(newAuction.ownerOf(newAuction.tokenCounter() - 1 ));
+        // emit Log(newAuction.ownerOf(newAuction.tokenCounter() - 1 ));
 
         auctions.push(newAuction); // add auction to list
     }
@@ -90,7 +90,7 @@ contract Auction is NFT {
     // uint256 public startTime; // block.timestamp - time when auction created
     uint256 public endTime; //time when auction will be closed
     string public descriprion;
-    NFT public product;
+    // NFT public product;
 
     // create enum type of auction states
     enum State{Running, Finallized}
@@ -125,6 +125,7 @@ contract Auction is NFT {
 
         // tokenCounter = 0;
         mintNFT(_tokenURI);
+    
     }
 
     // just return title of this auction
