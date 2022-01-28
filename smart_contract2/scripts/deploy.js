@@ -7,12 +7,12 @@ const hre = require("hardhat");
 
 const main = async () => {
   // We get the contract to deploy
-  const AuctionBox = await hre.ethers.getContractFactory("AuctionBox");
-  const auctionBox = await AuctionBox.deploy();
+  const Transactions = await hre.ethers.getContractFactory("AuctionBox");
+  const transactions = await Transactions.deploy();
 
-  await auctionBox.deployed();
+  await transactions.deployed();
 
-  console.log("Transactions deployed to:", auctionBox.address);
+  console.log("Transactions deployed to:", transactions.address);
 }
 
 const runMain = async () => {
