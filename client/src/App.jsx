@@ -1,10 +1,12 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuctionContext } from './context/AuctionContext';
 
 function App() {
-  // const { test } = useContext(AuctionContext);
+  const { getAuctions } = useContext(AuctionContext);
 
   // console.log(test);
+
+  useEffect(getAuctions, []);
 
   return (
     <div className="App">
