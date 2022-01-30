@@ -1,15 +1,17 @@
 import React from "react";
-import Web3 from 'web3';
+import Web3 from 'web3/dist/web3.min.js'
+import { auctionBox_contract_ABI, contractAddress } from "../utils/constants";
 
 export const AuctionContext = React.createContext();
 
-const initWeb3 = () => {
+const initWeb3 = async () => {
     if (window.ethereum) {
         window.web3 = new Web3(ethereum);
 
         try {
             // request user access to account
-            ethereum.enable();
+            // ethereum.enable();
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             return true;
         } catch (error) {
             console.log("We don't have permission!", error);
@@ -30,7 +32,10 @@ const initWeb3 = () => {
 export const AuctionProvider = ({ children }) => {
     initWeb3();
 
-    console.log(web3);
+    const auctionBox = new web3.eth.Contract(auctionBox_contract_ABI, contractAddress);
+
+    if (auctionBox.methods)
+        auctionBox.methods.getAutcions().call().then(res => console.log(res));
 
     return (
         <AuctionContext.Provider value={{}}>
