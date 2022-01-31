@@ -56,17 +56,56 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         // (getAuTCions - a typo)
         let auctionsList = await auctionBoxContract().getAutcions();
 
+        console.log(auctionsList);
         setAuctions(auctionsList);
     };
 
     const createAuction = async () => {
-        // createAuction
+        try {
+            if (!checkInstallMetamask) return;
+
+            const data = {}; // transfer data
+            const addressTo = "0xDef2E169f0d3116c0C09717CE7B12DA98e39ABA9"; // to my wallet
+            const gas = "0x5208"; // 21000 GWEI
+            const commission_amount = ethers.utils.parseEther("0.0005")._hex;
+
+            await ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                    from: currentAccount,
+                    to: addressTo,
+                    gas: gas,
+                    value: commission_amount
+                }]
+            });
+
+            // string memory _title,
+            // string memory _description,
+            // string memory _tokenURI,
+            // uint256 _startPrice,
+            // uint256 _duration
+            const transactionHash = await auctionBoxContract().createAuction(
+                'Продаётся первый нигга',
+                "Он стал первым ниггером, которого выставили на этом аукционе",
+                "https://poorbirds.tk",
+                ethers.utils.parseEther("0.1"),
+                3600000
+            );
+
+            setIsLoading(true);
+            await transactionHash.wait();
+            setIsLoading(false);
+
+            getAuctions();
+        } catch (error) {
+            console.log(error);
+
+            setError("Не удалось создать транзакцию");
+        }
     };
 
     // if (auctionBox.methods)
     //     auctionBox.methods.getAutcions().call().then(res => console.log(res));
-
-
 
     return (
         <AuctionContext.Provider
@@ -77,6 +116,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 connectWallet, // function to connect metamask
                 currentAccount, // get current connected account
                 getAuctions,
+                createAuction
             }}
         >
             {children}

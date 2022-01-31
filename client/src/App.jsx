@@ -2,11 +2,13 @@ import { useContext, useEffect, useState } from 'react';
 import { AuctionContext } from './context/AuctionContext';
 
 function App() {
-  const { error, connectWallet, installMetamask, currentAccount, getAuctions } = useContext(AuctionContext);
+  const { error, connectWallet, installMetamask, currentAccount, getAuctions, createAuction } = useContext(AuctionContext);
 
   // console.log(test);
 
-  useEffect(getAuctions, []);
+  useEffect(() => {
+    getAuctions();
+  }, []);
 
 
   return (
@@ -24,6 +26,7 @@ function App() {
       }
 
       {!currentAccount && <button onClick={connectWallet}>Подключить метамаск</button>}
+      {currentAccount && <button onClick={createAuction}>Создать аукцион</button>}
 
 
     </div>
