@@ -31,9 +31,99 @@ const nftContract = (address: string) => {
     return getEthereumContract(NFT_contract_ABI, address);
 };
 
-// TODO class
+class EthConnection extends React.Component {
+    constructor(props: any) {
+        super(props);
 
-export const AuctionProvider: React.FC = ({ children }: any) => {
+        this.state = {
+            currentAccount: '',
+            installMetamask: false
+        }
+    }
+
+    /**
+        * check if is window.ethereum set
+        * @returns boolean
+        */
+    checkInstallMetamask = () => {
+        if (!ethereum) {
+            this.setState({ installMetamask: true });
+            return false;
+        }
+        this.setState({ installMetamask: false });
+        return true;
+    };
+
+    /**
+     * connect metamask to app and get current account
+     */
+    connectWallet = async () => {
+        try {
+            if (!this.checkInstallMetamask()) return;
+
+            // request metamask to get current account
+            // it will connect metamask to our app
+            const accounts: string[] = await ethereum.request({ method: "eth_requestAccounts" });
+
+            // safe wallet address
+            if (accounts[0]) this.setState({ currentAccount: accounts[0] });
+        } catch (error) {
+            this.setState({ installMetamask: true });
+        }
+    }
+
+    /**
+     * try to metamask account and save it, if metamask is connected
+     */
+    checkIfWalletConnected = async () => {
+        try {
+            if (!this.checkInstallMetamask()) return;
+
+            const accounts = await ethereum.request({ method: "eth_accounts" });
+
+            if (accounts[0]) this.setState({ currentAccount: accounts[0] });
+            // else setError("Подключите, пожалуйста, кошелёк metamask");
+        } catch (error) {
+            console.log("Some error happened", error);
+            // setError("Произошла какая-то ошибка");
+        }
+    };
+}
+
+
+
+export class AuctionProvider extends EthConnection {
+    constructor(props: any) {
+        super(props);
+
+        this.state = {
+            error: '',
+            isLoading: false,
+            installMetamask: false,
+        }
+
+        this.connectWallet();
+    }
+
+    render(): React.ReactNode {
+        return (
+            <AuctionContext.Provider
+                value={{
+                    // error, // errors messages
+                    // isLoading, // loading state
+                    // installMetamask, // is metamask installed
+                    // connectWallet, // function to connect metamask
+                    // currentAccount, // get current connected account
+                    // getAuctions,
+                }}
+            >
+                {this.props.children}
+            </AuctionContext.Provider>
+        );
+    }
+}
+
+export const AuctionProvider2: React.FC = ({ children }: any) => {
     const [installMetamask, setInstallMetamask] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
