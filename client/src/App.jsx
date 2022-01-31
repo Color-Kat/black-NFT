@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuctionContext } from './context/AuctionContext';
 
 function App() {
-  const { error, connectWallet, installMetamask, getAuctions } = useContext(AuctionContext);
+  const { error, connectWallet, installMetamask, currentAccount, getAuctions } = useContext(AuctionContext);
 
   // console.log(test);
 
@@ -14,7 +14,7 @@ function App() {
       {error &&
         <>
           <h1>It's ERROR, nigga!</h1>
-          <h4>{error}</h4>
+          <h3>{error}</h3>
         </>
       }
 
@@ -23,7 +23,8 @@ function App() {
         : <h2>Hello, nigger</h2>
       }
 
-      <button onClick={connectWallet}>Подключить метамаск</button>
+      {!currentAccount && <button onClick={connectWallet}>Подключить метамаск</button>}
+
 
     </div>
   )

@@ -31,6 +31,8 @@ const nftContract = (address: string) => {
     return getEthereumContract(NFT_contract_ABI, address);
 };
 
+// TODO class
+
 export const AuctionProvider: React.FC = ({ children }: any) => {
     const [installMetamask, setInstallMetamask] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -51,15 +53,22 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
             setInstallMetamask(true);
             return false;
         }
+        setInstallMetamask(false);
         return true;
     };
 
+    /**
+     * connect metamask to app and get current account
+     */
     const connectWallet = async () => {
         try {
             if (!checkInstallMetamask()) return;
 
-            const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+            // request metamask to get current account
+            // it will connect metamask to our app
+            const accounts: string[] = await ethereum.request({ method: "eth_requestAccounts" });
 
+            // safe wallet address
             if (accounts[0]) setCurrentAccount(accounts[0]);
         } catch (error) {
             setInstallMetamask(true);
@@ -90,9 +99,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         if (!checkInstallMetamask()) return;
 
         // (getAuTCions - a typo)
-        // let auctionsList = await auctionBoxContract().getAutcions();
+        let auctionsList = await auctionBoxContract().getAutcions();
 
-        // setAuctions(auctionsList);
+        setAuctions(auctionsList);
     };
 
     const createAuction = async () => {
@@ -109,10 +118,11 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     return (
         <AuctionContext.Provider
             value={{
-                error,
-                isLoading,
-                installMetamask,
-                connectWallet,
+                error, // errors messages
+                isLoading, // loading state
+                installMetamask, // is metamask installed
+                connectWallet, // function to connect metamask
+                currentAccount, // get current connected account
                 getAuctions,
             }}
         >
