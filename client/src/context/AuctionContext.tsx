@@ -52,12 +52,11 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
      */
     const getAuctions = async () => {
         if (!checkInstallMetamask()) return;
+        // console.log(await auctionBoxContract().auctions(1));
 
-        // (getAuTCions - a typo)
-        let auctionsList = await auctionBoxContract().getAutcions();
-        console.log(await auctionContract(auctionsList[0]).getTitle());
-        console.log(await auctionContract(auctionsList[0]).getContent());
+        let auctionsList = await auctionBoxContract().getAuctions();
 
+        console.log(await auctionBoxContract().getAuctionTokenURIById(0));
 
         console.log(auctionsList);
         setAuctions(auctionsList);

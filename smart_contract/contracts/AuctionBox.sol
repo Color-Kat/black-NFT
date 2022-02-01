@@ -50,7 +50,7 @@ contract AuctionBox {
     }
 
     // just return our auctions array
-    function getAutcions() public view returns (Auction[] memory) {
+    function getAuctions() public view returns (Auction[] memory) {
         return auctions;
     }
 

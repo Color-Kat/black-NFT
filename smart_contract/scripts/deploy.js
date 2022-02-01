@@ -12,7 +12,7 @@ const main = async () => {
 
   await auctionBox.deployed();
 
-  console.log("Transactions deployed to:", auctionBox.address);
+  console.log("Contract deployed to:", auctionBox.address);
 }
 
 const runMain = async () => {

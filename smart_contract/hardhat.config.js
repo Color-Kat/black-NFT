@@ -1,7 +1,9 @@
 // https://eth-ropsten.alchemyapi.io/v2/2dW1C1L15ivv4LbAOIVh_jgH9-0znyd5
 
 // Contract address
-// 0x42e627a16c0Bf4bfdfB00f6B9B4187b80D020C62
+// first -0x42e627a16c0Bf4bfdfB00f6B9B4187b80D020C62
+
+// deploy by `npx hardhat run scripts/deploy.js --network ropsten`
 
 
 require("@nomiclabs/hardhat-waffle");
