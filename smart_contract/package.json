@@ -17,5 +17,8 @@
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
     "hardhat": "^2.8.3"
+  },
+  "dependencies": {
+    "base64-sol": "^1.1.0"
   }
 }

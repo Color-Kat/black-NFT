@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 // contracts that implements NFT methods to our contract
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "base64-sol/base64.sol";
 
 struct AuctionContent {
     address owner;
@@ -14,7 +15,7 @@ struct AuctionContent {
     uint256 endTime;
 }
 
-contract AuctionBox{
+contract AuctionBox {
     // auctions array
     Auction[] public auctions;
 
@@ -26,12 +27,19 @@ contract AuctionBox{
     function createAuction(
         string memory _title,
         string memory _description,
-        string memory _tokenURI,
+        string memory _svg,
         uint256 _startPrice,
         uint256 _duration //time when auction will be closed
     ) public {
         // create new Auction instance
-        Auction newAuction = new Auction(payable(msg.sender), _title, _description, _tokenURI, _startPrice, _duration);
+        Auction newAuction = new Auction(
+            payable(msg.sender),
+            _title,
+            _description,
+            _svg,
+            _startPrice,
+            _duration
+        );
 
         emit AuctionCreated(newAuction);
 
@@ -49,20 +57,28 @@ contract AuctionBox{
         return auctions[_id];
     }
 
-    function getAuctionTokenURIById(uint256 _id) public view returns (string memory) {
+    function getAuctionTokenURIById(uint256 _id)
+        public
+        view
+        returns (string memory)
+    {
         return auctions[_id].tokenURI(_id);
     }
 
     // return content of auction by id
-    function getContent(uint256 _id) public view returns (AuctionContent memory) {
+    function getContent(uint256 _id)
+        public
+        view
+        returns (AuctionContent memory)
+    {
         return auctions[_id].getContent();
     }
 }
 
-contract NFT is ERC721URIStorage{
-    uint256 public tokenCounter; // id of current 
+contract NFT is ERC721URIStorage {
+    uint256 public tokenCounter; // id of current
 
-    constructor() ERC721("NiggaNFT", "Nigga") {
+    constructor() ERC721("Nigga NFT", "NiggaNFT") {
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
     }
 
@@ -70,13 +86,41 @@ contract NFT is ERC721URIStorage{
     //     tokenCounter = 0; // count of NFT equals 0 when we deploy contract
     // }
 
-    function mintNFT(string memory tokenURI) public returns (uint256){
+    // convert svg string to imageURI
+    function svgToImageURI(string memory svg) private pure returns (string memory) {
+        string memory baseURL = "data:image/svg+xml;base64,";
+        string memory svgBase64Encoded = Base64.encode(bytes(string(abi.encodePacked(svg))));
+        return string(abi.encodePacked(baseURL,svgBase64Encoded));
+    }
+
+    function formatTokenURI(string memory imageURI, string memory name, string memory description) private pure returns (string memory) {
+        return string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        bytes(
+                            abi.encodePacked(
+                                '{"name":"', name, '",',
+                                '"description":"', description, '",', 
+                                '"attributes":"",',  
+                                '"image":"',imageURI,'"}'
+                            )
+                        )
+                    )
+                )
+            );
+    }
+
+    function mintNFT(string memory svg, string memory _title,  string memory _description) public returns (uint256) {
         uint256 newItemId = tokenCounter;
 
         // create new NFT by owner(sender) and new NFT id
-        _mint(msg.sender, newItemId);
+        _safeMint(msg.sender, newItemId);
+        string memory imageURI = svgToImageURI(svg);
+        string memory tokenURI = formatTokenURI(imageURI, _title, _description);
+
         _setTokenURI(newItemId, tokenURI);
-        
+
         tokenCounter++; // increase count of NFT
 
         return newItemId;
@@ -90,10 +134,13 @@ contract Auction is NFT {
     // uint256 public startTime; // block.timestamp - time when auction created
     uint256 public endTime; //time when auction will be closed
     string public descriprion;
-    // NFT public product;
+    uint256 public nftTokenId;
 
     // create enum type of auction states
-    enum State{Running, Finallized}
+    enum State {
+        Running,
+        Finallized
+    }
     // create auction state
     State public auctionState;
 
@@ -108,7 +155,7 @@ contract Auction is NFT {
         address payable _owner,
         string memory _title,
         string memory _description,
-        string memory _tokenURI,
+        string memory _svg,
         uint256 _startPrice,
         uint256 _duration
     ) {
@@ -124,25 +171,26 @@ contract Auction is NFT {
         // nftTokenId = nft.mintNFT(_tokenURI);
 
         // tokenCounter = 0;
-        mintNFT(_tokenURI);
-    
+        nftTokenId = mintNFT(_svg, _title, _description);
     }
 
     // just return title of this auction
-    function getTitle() public view returns(string memory) {
+    function getTitle() public view returns (string memory) {
         return title;
     }
-    
+
     // return structure of fields this auction
     function getContent() public view returns (AuctionContent memory) {
-        return AuctionContent(
-            owner,
-            title,
-            descriprion,
-            tokenCounter,
-            startPrice,
-            endTime
-        );
+        return
+            AuctionContent(
+                owner,
+                title,
+                descriprion,
+                nftTokenId,
+                tokenCounter,
+                startPrice,
+                endTime
+            );
     }
 
     // // return tuple of fields this auction

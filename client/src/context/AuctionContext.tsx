@@ -55,6 +55,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
         // (getAuTCions - a typo)
         let auctionsList = await auctionBoxContract().getAutcions();
+        console.log(await auctionContract(auctionsList[0]).getTitle());
+        console.log(await auctionContract(auctionsList[0]).getContent());
+
 
         console.log(auctionsList);
         setAuctions(auctionsList);

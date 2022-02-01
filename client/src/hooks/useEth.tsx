@@ -31,7 +31,10 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
             const accounts: string[] = await ethereum.request({ method: "eth_requestAccounts" });
 
             // safe wallet address
-            if (accounts[0]) setCurrentAccount(accounts[0]);
+            if (accounts[0]) {
+                setCurrentAccount(accounts[0]);
+                setInstallMetamaskCallback(false);
+            }
         } catch (error) {
             setInstallMetamaskCallback(true);
             setErrorCallback("Не удаётся получить доступ к кошельку metamask");
@@ -46,7 +49,7 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
             if (!checkInstallMetamask()) return;
 
             const accounts = await ethereum.request({ method: "eth_accounts" });
-            
+
             if (accounts[0]) setCurrentAccount(accounts[0]);
             else setErrorCallback("Подключите, пожалуйста, кошелёк metamask");
         } catch (error) {
