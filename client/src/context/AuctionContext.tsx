@@ -84,13 +84,13 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
             // string memory _title,
             // string memory _description,
-            // string memory _tokenURI,
+            // string memory _svg,
             // uint256 _startPrice,
             // uint256 _duration
             const transactionHash = await auctionBoxContract().createAuction(
                 'Продаётся первый нигга',
-                "Он стал первым ниггером, которого выставили на этом аукционе",
-                "https://poorbirds.tk",
+                'Он стал первым ниггером, которого выставили на этом аукционе',
+                '<svg height="150" width="400"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" /></linearGradient></defs><ellipse cx="200" cy="70" rx="85" ry="55" fill="url(#grad1)" /></svg>',
                 ethers.utils.parseEther("0.1"),
                 3600000
             );

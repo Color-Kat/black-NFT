@@ -21,7 +21,7 @@ contract AuctionBox {
 
     // call event when auction is created
     event AuctionCreated(Auction _auction);
-    event Log(address _message);
+    event Log(string _message);
 
     // add to auctions array new Auction instance
     function createAuction(
@@ -46,6 +46,7 @@ contract AuctionBox {
         // emit Log(newAuction.ownerOf(newAuction.tokenCounter() - 1 ));
 
         auctions.push(newAuction); // add auction to list
+
     }
 
     // just return our auctions array
@@ -78,13 +79,11 @@ contract AuctionBox {
 contract NFT is ERC721URIStorage {
     uint256 public tokenCounter; // id of current
 
+    event NFTCreated(uint256 newItemId, string tokenURI);
+
     constructor() ERC721("Nigga NFT", "NiggaNFT") {
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
     }
-
-    //  constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-    //     tokenCounter = 0; // count of NFT equals 0 when we deploy contract
-    // }
 
     // convert svg string to imageURI
     function svgToImageURI(string memory svg) private pure returns (string memory) {
@@ -115,11 +114,13 @@ contract NFT is ERC721URIStorage {
         uint256 newItemId = tokenCounter;
 
         // create new NFT by owner(sender) and new NFT id
-        _safeMint(msg.sender, newItemId);
+        _mint(msg.sender, newItemId);
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(imageURI, _title, _description);
 
         _setTokenURI(newItemId, tokenURI);
+
+        emit NFTCreated(newItemId, tokenURI);
 
         tokenCounter++; // increase count of NFT
 
@@ -166,11 +167,7 @@ contract Auction is NFT {
         startPrice = _startPrice;
         endTime = block.timestamp + _duration; // count end date (now + auction duration)
 
-        // create new NFT product
-        // NFT nft = new NFT();
-        // nftTokenId = nft.mintNFT(_tokenURI);
-
-        // tokenCounter = 0;
+        tokenCounter = 0;
         nftTokenId = mintNFT(_svg, _title, _description);
     }
 
@@ -187,30 +184,8 @@ contract Auction is NFT {
                 title,
                 descriprion,
                 nftTokenId,
-                tokenCounter,
                 startPrice,
                 endTime
             );
     }
-
-    // // return tuple of fields this auction
-    // function getContent() public view returns (
-    //     address, // owner
-    //     string memory, // title
-    //     string memory, // descr
-    //     uint256, // startPrice
-    //     uint256 // endTime
-    // ) {
-    //     return (
-    //         owner,
-    //         title,
-    //         descriprion,
-    //         startPrice,
-    //         endTime
-    //     );
-    // }
 }
-
-// abstract contract AuctionStructure is AuctionBox, Auction{
-
-// }
