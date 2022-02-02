@@ -87,6 +87,13 @@ contract NFT is ERC721URIStorage {
     bytes32 private keyHash;
     uint256 private fee;
 
+    // svg parameters
+    uint256 public maxNumberOfPaths;
+    uint256 public maxNumberOfPathCommands;
+    uint256 public size;
+    string[] public pathCommands;
+    string[] public colors;
+
     mapping (bytes32 => address) public requestIdToSender;
     mapping (bytes32 => uint256) public requestIdToTokenId;
     mapping (uint256 => uint256) public tokenIdToRandomNumber;
@@ -105,10 +112,59 @@ contract NFT is ERC721URIStorage {
         fee = _fee;
 
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
+
+        maxNumberOfPaths = 10;
+        maxNumberOfPathCommands = 5;
+        size = 500;
+        pathCommands = ["M", "L"];
+        colors = ["#fcba03", "#3163eb", "#479900", "black"];
     }
 
     function generateSVG(uint256 _randomNumber) public view returns(string memory finalSVG) {
+        uint256 numberOfPaths = (_randomNumber % maxNumberOfPaths) + 1; 
 
+        // svg start
+        finalSVG = string(abi.encodePacked(
+            '<svg height="', uint2str(size), '210" width="', uint2str(size), '">'
+        ));
+
+        // generate <paths>
+        for (uint i = 0; i < numberOfPaths; i++) {
+            // as i understand, we make hash by randomNumber and i and create from hash new number
+            uint256 newRNG = uint256(keccak256(abi.encode(_randomNumber, i)));
+            string memory pathSVG = generatePath(newRNG);
+            finalSVG = string(abi.encodePacked(finalSVG, pathSVG));
+        }
+
+        finalSVG = string(abi.encodePacked(finalSVG, "</svg"));
+
+        return finalSVG;
+    }
+
+    function generatePath () internal view returns (string memory pathSVG){
+
+    }
+
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
     }
 
     // convert svg string to imageURI
