@@ -56,7 +56,10 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
         let auctionsList = await auctionBoxContract().getAuctions();
 
-        console.log(await auctionBoxContract().getAuctionTokenURIById(0));
+        // console.log(await auctionBoxContract().getAuctionTokenURIById(1));
+        console.log(auctionContract(auctionsList[1]));
+        console.log(await auctionContract(auctionsList[1]).tokenURI(0));
+
 
         console.log(auctionsList);
         setAuctions(auctionsList);
@@ -87,9 +90,24 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
             // uint256 _startPrice,
             // uint256 _duration
             const transactionHash = await auctionBoxContract().createAuction(
-                'Продаётся первый нигга',
-                'Он стал первым ниггером, которого выставили на этом аукционе',
-                '<svg height="150" width="400"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" /></linearGradient></defs><ellipse cx="200" cy="70" rx="85" ry="55" fill="url(#grad1)" /></svg>',
+                'Белые нигги в чёрных квадратах',
+                'Искусство',
+                `<svg xmlns="http://www.w3.org/2000/svg" width="580" height="400">
+                <g>
+                 <title>background</title>
+                 <rect fill="#fff" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
+                 <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+                  <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+                 </g>
+                </g>
+                <g>
+                 <title>Layer 1</title>
+                 <rect id="svg_1" height="128" width="298" y="90.453125" x="1.5" stroke-width="1.5" stroke="#000" fill="#fff"/>
+                 <rect id="svg_2" height="26" width="89" y="144.453125" x="134.5" stroke-width="1.5" stroke="#000" fill="#fff"/>
+                 <rect id="svg_3" height="86" width="115" y="175.453125" x="392.5" stroke-width="1.5" stroke="#000" fill="#fff"/>
+                 <rect id="svg_4" height="108" width="130" y="268.453125" x="136.5" stroke-width="1.5" stroke="#000" fill="#fff"/>
+                </g>
+               </svg>`,
                 ethers.utils.parseEther("0.1"),
                 3600000
             );

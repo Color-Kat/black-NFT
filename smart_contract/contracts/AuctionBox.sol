@@ -2,9 +2,10 @@
 pragma solidity ^0.8.0;
 
 // contracts that implements NFT methods to our contract
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "base64-sol/base64.sol";
+
+import "base64-sol/base64.sol"; // base64 encode
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol"; // generate random number
 
 struct AuctionContent {
     address owner;
@@ -79,9 +80,20 @@ contract AuctionBox {
 contract NFT is ERC721URIStorage {
     uint256 public tokenCounter; // id of current
 
+    // for VRFConsumerBase
+    bytes32 private keyHash;
+    uint256 private fee;
+
     event NFTCreated(uint256 newItemId, string tokenURI);
 
-    constructor() ERC721("Nigga NFT", "NiggaNFT") {
+    // get in constructor some parameters to VRMConsumerBase
+    constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyHash, uint256 _fee) 
+        VRFConsumerBase(_VRFCoordinator, _LinkToken) 
+        ERC721("Nigga NFT", "NiggaNFT"
+    ) {
+        keyHash = _keyHash;
+        fee = _fee;
+
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
     }
 
@@ -110,7 +122,11 @@ contract NFT is ERC721URIStorage {
             );
     }
 
-    function mintNFT(string memory svg, string memory _title,  string memory _description) public returns (uint256) {
+    function mintNFT(
+        string memory svg, 
+        string memory _title, 
+        string memory _description
+    ) public returns (uint256) {
         uint256 newItemId = tokenCounter;
 
         // create new NFT by owner(sender) and new NFT id
@@ -167,7 +183,7 @@ contract Auction is NFT {
         startPrice = _startPrice;
         endTime = block.timestamp + _duration; // count end date (now + auction duration)
 
-        tokenCounter = 0;
+        // tokenCounter = 0;
         nftTokenId = mintNFT(_svg, _title, _description);
     }
 
