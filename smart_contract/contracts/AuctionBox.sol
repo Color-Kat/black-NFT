@@ -78,13 +78,23 @@ contract AuctionBox {
 }
 
 contract NFT is ERC721URIStorage {
-    uint256 public tokenCounter; // id of current
+    uint256 public tokenCounter; // id of current nft
+
+    string public nft_name;
+    string public nft_description;
 
     // for VRFConsumerBase
     bytes32 private keyHash;
     uint256 private fee;
 
+    mapping (bytes32 => address) public requestIdToSender;
+    mapping (bytes32 => uint256) public requestIdToTokenId;
+    mapping (uint256 => uint256) public tokenIdToRandomNumber;
+
     event NFTCreated(uint256 newItemId, string tokenURI);
+    event RequestedRandomSVG(bytes32 indexed requestId, uint256 indexed tokenId);
+    event CreatedUnfinishedRandomSVG(uint256 indexed tokenId, uint256 randomNumber);
+    event CreatedRandomSVG(uint256 indexed tokenId, string svg);
 
     // get in constructor some parameters to VRMConsumerBase
     constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyHash, uint256 _fee) 
@@ -95,6 +105,10 @@ contract NFT is ERC721URIStorage {
         fee = _fee;
 
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
+    }
+
+    function generateSVG(uint256 _randomNumber) public view returns(string memory finalSVG) {
+
     }
 
     // convert svg string to imageURI
@@ -122,25 +136,73 @@ contract NFT is ERC721URIStorage {
             );
     }
 
-    function mintNFT(
-        string memory svg, 
-        string memory _title, 
-        string memory _description
-    ) public returns (uint256) {
-        uint256 newItemId = tokenCounter;
+    // function mintNFT(
+    //     string memory svg, 
+    //     string memory _title, 
+    //     string memory _description
+    // ) public returns (uint256) {
+    //     uint256 newItemId = tokenCounter;
 
-        // create new NFT by owner(sender) and new NFT id
-        _mint(msg.sender, newItemId);
+    //     // create new NFT by owner(sender) and new NFT id
+    //     _mint(msg.sender, newItemId);
+    //     string memory imageURI = svgToImageURI(svg);
+    //     string memory tokenURI = formatTokenURI(imageURI, _title, _description);
+
+    //     _setTokenURI(newItemId, tokenURI);
+
+    //     emit NFTCreated(newItemId, tokenURI);
+
+    //     tokenCounter++; // increase count of NFT
+
+    //     return newItemId;
+    // }
+
+    // -----------------------------
+    function createNFT(
+        string memory _nft_name, 
+        string memory _nft_description
+    ) public returns (bytes32 requestId) {
+        requestId = requestRandomness(keyHash, fee); // get id of random number request
+        requestIdToSender[requestId] = msg.sender; // save it to sender(address)
+
+        // here reserve tokenId for this mint
+        // by save tokenId to our requestId (for random number)
+        uint256 tokenId = tokenCounter;
+        requestIdToTokenId[requestId] = tokenId;
+
+        // save nft name and description to future finishMint
+        nft_name = _nft_name;
+        nft_description = _nft_description;
+
+        tokenCounter++;
+
+        emit RequestedRandomSVG(requestId, tokenId);
+    }
+
+    function fulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal override{
+        // here we have a random number - randomNumber
+        address nftOwner = requestIdToSender[_requestId]; // get address of owner by requestId 
+        uint256 tokenId = requestIdToTokenId[_requestId]; // and so get nft tokenId by the same requestId
+
+        _mint(nftOwner, tokenId);
+
+        // now generate random SVG
+        tokenIdToRandomNumber[tokenId] = _randomNumber;
+        emit CreatedUnfinishedRandomSVG(tokenId, _randomNumber);
+    }
+
+    function finishMint(uint256 _tokenId) public {
+        require(bytes(tokenURI(_tokenId)).length, "tokenURI is already all set!");
+        require(tokenCounter > _tokenId, "TokenId has not minted yet");
+        require(tokenIdToRandomNumber[_tokenId] > 0, "Need to wait for Chainlink VRF create a random number");
+
+        uint256 randomNumber = tokenIdToRandomNumber[_tokenId];
+        string memory svg = generateSVG(randomNumber);
         string memory imageURI = svgToImageURI(svg);
-        string memory tokenURI = formatTokenURI(imageURI, _title, _description);
+        string memory tokenURI = formatTokenURI(imageURI, nft_name, nft_description);
+        _setTokenURI(_tokenId, tokenURI);
 
-        _setTokenURI(newItemId, tokenURI);
-
-        emit NFTCreated(newItemId, tokenURI);
-
-        tokenCounter++; // increase count of NFT
-
-        return newItemId;
+        emit CreatedRandomSVG(_tokenId, svg);
     }
 }
 
