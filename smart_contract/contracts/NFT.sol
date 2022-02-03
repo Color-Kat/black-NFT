@@ -5,9 +5,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 import "base64-sol/base64.sol"; // base64 encode
-import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol"; // generate random number
 
-contract NFT is ERC721URIStorage, VRFConsumerBase {
+contract NFT is ERC721URIStorage {
     uint256 public tokenCounter; // id of current nft
 
     string public nft_name;
@@ -46,13 +45,9 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
     // uint256 _fee = 1000000000000000000;
 
     // get in constructor some parameters to VRMConsumerBase
-    constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyHash, uint256 _fee)
-        VRFConsumerBase(0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B, 0x01BE23585060835E02B77ef475b0Cc51aA1e0709)
+    constructor()
         ERC721("Nigga NFT", "NiggaNFT")
     {
-        keyHash = _keyHash;
-        fee = _fee;
-
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
 
         maxNumberOfPaths = 10;
@@ -73,7 +68,7 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
         // svg start
         finalSVG = string(
             abi.encodePacked(
-                '<svg height="',
+                '<svg xmlns="http://www.w3.org/2000/svg" height="',
                 uint2str(size),
                 '210" width="',
                 uint2str(size),
@@ -228,54 +223,23 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
             );
     }
 
-    function createNFT(string memory _nft_name, string memory _nft_description)
-        public
-        returns (bytes32 requestId)
-    {
-        requestId = requestRandomness(keyHash, fee); // get id of random number request
-        requestIdToSender[requestId] = msg.sender; // save it to sender(address)
+    function getRandomNumber() public view returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender)));
+    }
 
-        // here reserve tokenId for this mint
-        // by save tokenId to our requestId (for random number)
+    function createNFT(string memory _nft_name, string memory _nft_description)
+        public returns (uint256)
+    {
+        uint256 randomNumber = getRandomNumber(); // get id of random number re
+
+        _mint(msg.sender, tokenCounter);
+
         uint256 tokenId = tokenCounter;
-        requestIdToTokenId[requestId] = tokenId;
 
         // save nft name and description to future finishMint
         nft_name = _nft_name;
         nft_description = _nft_description;
 
-        tokenCounter++;
-
-        emit RequestedRandomSVG(requestId, tokenId);
-    }
-
-    function fulfillRandomness(bytes32 _requestId, uint256 _randomNumber)
-        internal
-        override
-    {
-        // here we have a random number - randomNumber
-        address nftOwner = requestIdToSender[_requestId]; // get address of owner by requestId
-        uint256 tokenId = requestIdToTokenId[_requestId]; // and so get nft tokenId by the same requestId
-
-        _mint(nftOwner, tokenId);
-
-        // now generate random SVG
-        tokenIdToRandomNumber[tokenId] = _randomNumber;
-        emit CreatedUnfinishedRandomSVG(tokenId, _randomNumber);
-    }
-
-    function finishMint(uint256 _tokenId) public {
-        require(
-            bytes(tokenURI(_tokenId)).length <= 0,
-            "tokenURI is already all set!"
-        );
-        require(tokenCounter > _tokenId, "TokenId has not minted yet");
-        require(
-            tokenIdToRandomNumber[_tokenId] > 0,
-            "Need to wait for Chainlink VRF create a random number"
-        );
-
-        uint256 randomNumber = tokenIdToRandomNumber[_tokenId];
         string memory svg = generateSVG(randomNumber);
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(
@@ -283,8 +247,12 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
             nft_name,
             nft_description
         );
-        _setTokenURI(_tokenId, tokenURI);
 
-        emit CreatedRandomSVG(_tokenId, svg);
+        _setTokenURI(tokenId, tokenURI);
+
+        emit CreatedRandomSVG(tokenId, svg);
+
+        tokenCounter++;
+        return tokenId;
     }
 }
