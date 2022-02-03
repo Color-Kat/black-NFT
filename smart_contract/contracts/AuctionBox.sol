@@ -3,9 +3,7 @@ pragma solidity ^0.8.0;
 
 // contracts that implements NFT methods to our contract
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-
 import "base64-sol/base64.sol"; // base64 encode
-import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol"; // generate random number
 
 struct AuctionContent {
     address owner;
@@ -28,7 +26,6 @@ contract AuctionBox {
     function createAuction(
         string memory _title,
         string memory _description,
-        // string memory _svg,
         uint256 _startPrice,
         uint256 _duration //time when auction will be closed
     ) public payable {
@@ -37,14 +34,11 @@ contract AuctionBox {
             payable(msg.sender),
             _title,
             _description,
-            // _svg,
             _startPrice,
             _duration
         );
 
         emit AuctionCreated(newAuction);
-
-        // emit Log(newAuction.ownerOf(newAuction.tokenCounter() - 1 ));
 
         auctions.push(newAuction); // add auction to list
     }
@@ -76,54 +70,29 @@ contract AuctionBox {
     }
 }
 
-contract NFT is ERC721URIStorage, VRFConsumerBase {
+contract NFT is ERC721URIStorage {
     uint256 public tokenCounter; // id of current nft
 
     string public nft_name;
     string public nft_description;
 
-    // for VRFConsumerBase
-    bytes32 public keyHash;
-    uint256 public fee;
-
     // svg parameters
-    uint256 public maxNumberOfPaths;
-    uint256 public maxNumberOfPathCommands;
-    uint256 public size;
-    string[] public pathCommands;
-    string[] public colors;
+    uint256 private maxNumberOfPaths;
+    uint256 private maxNumberOfPathCommands;
+    uint256 private size;
+    string[] private pathCommands;
+    string[] private colors;
 
-    mapping(bytes32 => address) public requestIdToSender;
-    mapping(bytes32 => uint256) public requestIdToTokenId;
-    mapping(uint256 => uint256) public tokenIdToRandomNumber;
+    event RequestRandomSVG( uint256 randomNumber);
+    event CreatedRandomSVG(string svg);
+    event NFTCreated(uint256 indexed tokenId, string tokenURI);
 
-    event NFTCreated(uint256 newItemId, string tokenURI);
-    event RequestedRandomSVG(
-        bytes32 indexed requestId,
-        uint256 indexed tokenId
-    );
-    event CreatedUnfinishedRandomSVG(
-        uint256 indexed tokenId,
-        uint256 randomNumber
-    );
-    event CreatedRandomSVG(uint256 indexed tokenId, string svg);
-
-    address _VRFCoordinator = 0xf720CF1B963e0e7bE9F58fd471EFa67e7bF00cfb;
-    address _LinkToken = 0x20fE562d797A42Dcb3399062AE9546cd06f63280;
-    bytes32 _keyHash =
-        0xced103054e349b8dfb51352f0f8fa9b5d20dde3d06f9f43cb2b85bc64b238205;
-    uint256 _fee = 1000000000000000000;
-
-    // get in constructor some parameters to VRMConsumerBase
     constructor()
-        VRFConsumerBase(_VRFCoordinator, _LinkToken)
         ERC721("Nigga NFT", "NiggaNFT")
     {
-        keyHash = _keyHash;
-        fee = _fee;
-
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
 
+        // set default parameters for svg
         maxNumberOfPaths = 10;
         maxNumberOfPathCommands = 5;
         size = 500;
@@ -142,7 +111,7 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
         // svg start
         finalSVG = string(
             abi.encodePacked(
-                '<svg height="',
+                '<svg xmlns="http://www.w3.org/2000/svg" height="',
                 uint2str(size),
                 '210" width="',
                 uint2str(size),
@@ -209,6 +178,7 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
         returns (string memory pathCommand)
     {
         pathCommand = pathCommands[_randomNumber % pathCommands.length];
+
         uint256 parameterOne = uint256(
             keccak256(abi.encode(_randomNumber, size * 2))
         ) % size;
@@ -219,10 +189,10 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
         pathCommand = string(
             abi.encodePacked(
                 pathCommand,
-                " ",
                 uint2str(parameterOne),
                 " ",
-                uint2str(parameterTwo)
+                uint2str(parameterTwo),
+                " "
             )
         );
 
@@ -257,7 +227,7 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
 
     // convert svg string to imageURI
     function svgToImageURI(string memory svg)
-        private
+        internal
         pure
         returns (string memory)
     {
@@ -272,7 +242,7 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
         string memory imageURI,
         string memory name,
         string memory description
-    ) private pure returns (string memory) {
+    ) internal pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -297,76 +267,25 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
             );
     }
 
-    // function mintNFT(
-    //     string memory svg,
-    //     string memory _title,
-    //     string memory _description
-    // ) public returns (uint256) {
-    //     uint256 newItemId = tokenCounter;
+    function getRandomNumber() public view returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender)));
+    }
 
-    //     // create new NFT by owner(sender) and new NFT id
-    //     _mint(msg.sender, newItemId);
-    //     string memory imageURI = svgToImageURI(svg);
-    //     string memory tokenURI = formatTokenURI(imageURI, _title, _description);
-
-    //     _setTokenURI(newItemId, tokenURI);
-
-    //     emit NFTCreated(newItemId, tokenURI);
-
-    //     tokenCounter++; // increase count of NFT
-
-    //     return newItemId;
-    // }
-
-    // -----------------------------
     function createNFT(string memory _nft_name, string memory _nft_description)
-        public
-        returns (bytes32 requestId)
+        public returns (uint256)
     {
-        requestId = requestRandomness(keyHash, fee); // get id of random number request
-        requestIdToSender[requestId] = msg.sender; // save it to sender(address)
+        uint256 randomNumber = getRandomNumber(); // get id of random number re
 
-        // here reserve tokenId for this mint
-        // by save tokenId to our requestId (for random number)
+        _mint(msg.sender, tokenCounter);
+
         uint256 tokenId = tokenCounter;
-        requestIdToTokenId[requestId] = tokenId;
 
         // save nft name and description to future finishMint
         nft_name = _nft_name;
         nft_description = _nft_description;
 
-        tokenCounter++;
+        emit RequestRandomSVG(randomNumber);
 
-        emit RequestedRandomSVG(requestId, tokenId);
-    }
-
-    function fulfillRandomness(bytes32 _requestId, uint256 _randomNumber)
-        internal
-        override
-    {
-        // here we have a random number - randomNumber
-        address nftOwner = requestIdToSender[_requestId]; // get address of owner by requestId
-        uint256 tokenId = requestIdToTokenId[_requestId]; // and so get nft tokenId by the same requestId
-
-        _mint(nftOwner, tokenId);
-
-        // now generate random SVG
-        tokenIdToRandomNumber[tokenId] = _randomNumber;
-        emit CreatedUnfinishedRandomSVG(tokenId, _randomNumber);
-    }
-
-    function finishMint(uint256 _tokenId) public {
-        require(
-            bytes(tokenURI(_tokenId)).length <= 0,
-            "tokenURI is already all set!"
-        );
-        require(tokenCounter > _tokenId, "TokenId has not minted yet");
-        require(
-            tokenIdToRandomNumber[_tokenId] > 0,
-            "Need to wait for Chainlink VRF create a random number"
-        );
-
-        uint256 randomNumber = tokenIdToRandomNumber[_tokenId];
         string memory svg = generateSVG(randomNumber);
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(
@@ -374,35 +293,36 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
             nft_name,
             nft_description
         );
-        _setTokenURI(_tokenId, tokenURI);
 
-        emit CreatedRandomSVG(_tokenId, svg);
+        emit CreatedRandomSVG(svg);
+
+        _setTokenURI(tokenId, tokenURI);
+
+        emit NFTCreated(tokenId, tokenURI);
+
+        tokenCounter++;
+
+        return tokenId;
     }
 }
 
 contract Auction is NFT {
-    address payable private owner;
+    address payable public owner;
     string public title;
     uint256 public startPrice;
-    // uint256 public startTime; // block.timestamp - time when auction created
+    uint256 public startTime; // block.timestamp - time when auction created
     uint256 public endTime; //time when auction will be closed
     string public descriprion;
     uint256 public nftTokenId;
 
     // create enum type of auction states
-    enum State {
-        Running,
-        Finallized
-    }
-    // create auction state
-    State public auctionState;
+    enum State { Running, Finallized }
+    State public auctionState; // create auction state
 
     // data of bidder
     uint256 public highestPrice;
     address payable public highestBidder;
-
-    // bids list
-    mapping(address => uint256) public bids;
+    mapping(address => uint256) public bids; // bids list
 
     constructor(
         address payable _owner,
@@ -411,17 +331,17 @@ contract Auction is NFT {
         // string memory _svg,
         uint256 _startPrice,
         uint256 _duration
-    )  {
+    )
+    {
         // set data by input data from constructor parameters
         owner = _owner;
         title = _title;
         descriprion = _description;
         startPrice = _startPrice;
+        startTime = block.timestamp;
         endTime = block.timestamp + _duration; // count end date (now + auction duration)
 
-        // tokenCounter = 0;
-        // nftTokenId = createNFT(_title, _description);
-        createNFT(_title, _description);
+        nftTokenId =createNFT(_title, _description);
     }
 
     // just return title of this auction

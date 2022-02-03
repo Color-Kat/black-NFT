@@ -19,10 +19,7 @@ contract NFT is ERC721URIStorage {
     string[] private pathCommands;
     string[] private colors;
 
-    event RequestRandomSVG(
-        uint256 numberOfPaths,
-        uint256 randomNumber
-    );
+    event RequestRandomSVG( uint256 randomNumber);
 
     event CreatedRandomSVG(string svg);
 
@@ -50,8 +47,6 @@ contract NFT is ERC721URIStorage {
         // get random number of paths
         uint256 numberOfPaths = (_randomNumber % maxNumberOfPaths) + 1;
 
-        emit RequestRandomSVG(numberOfPaths, _randomNumber);
-
         // svg start
         finalSVG = string(
             abi.encodePacked(
@@ -72,8 +67,6 @@ contract NFT is ERC721URIStorage {
         }
 
         finalSVG = string(abi.encodePacked(finalSVG, "</svg>"));
-
-        emit CreatedRandomSVG(finalSVG);
 
         return finalSVG;
     }
@@ -230,6 +223,8 @@ contract NFT is ERC721URIStorage {
         nft_name = _nft_name;
         nft_description = _nft_description;
 
+        emit RequestRandomSVG(randomNumber);
+
         string memory svg = generateSVG(randomNumber);
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(
@@ -237,6 +232,8 @@ contract NFT is ERC721URIStorage {
             nft_name,
             nft_description
         );
+
+        emit CreatedRandomSVG(svg);
 
         _setTokenURI(tokenId, tokenURI);
 
