@@ -7,75 +7,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "base64-sol/base64.sol"; // base64 encode
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol"; // generate random number
 
-struct AuctionContent {
-    address owner;
-    string title;
-    string description;
-    uint256 nftTokenId;
-    uint256 startPrice;
-    uint256 endTime;
-}
-
-contract AuctionBox {
-    // auctions array
-    Auction[] public auctions;
-
-    // call event when auction is created
-    event AuctionCreated(Auction _auction);
-    event Log(string _message);
-
-    // add to auctions array new Auction instance
-    function createAuction(
-        string memory _title,
-        string memory _description,
-        // string memory _svg,
-        uint256 _startPrice,
-        uint256 _duration //time when auction will be closed
-    ) public payable {
-        // create new Auction instance
-        Auction newAuction = new Auction(
-            payable(msg.sender),
-            _title,
-            _description,
-            // _svg,
-            _startPrice,
-            _duration
-        );
-
-        emit AuctionCreated(newAuction);
-
-        // emit Log(newAuction.ownerOf(newAuction.tokenCounter() - 1 ));
-
-        auctions.push(newAuction); // add auction to list
-    }
-
-    // just return our auctions array
-    function getAuctions() public view returns (Auction[] memory) {
-        return auctions;
-    }
-
-    function getAuctionById(uint256 _id) public view returns (Auction) {
-        return auctions[_id];
-    }
-
-    function getAuctionTokenURIById(uint256 _id)
-        public
-        view
-        returns (string memory)
-    {
-        return auctions[_id].tokenURI(_id);
-    }
-
-    // return content of auction by id
-    function getContent(uint256 _id)
-        public
-        view
-        returns (AuctionContent memory)
-    {
-        return auctions[_id].getContent();
-    }
-}
-
 contract NFT is ERC721URIStorage, VRFConsumerBase {
     uint256 public tokenCounter; // id of current nft
 
@@ -108,15 +39,15 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
     );
     event CreatedRandomSVG(uint256 indexed tokenId, string svg);
 
-    address _VRFCoordinator = 0xf720CF1B963e0e7bE9F58fd471EFa67e7bF00cfb;
-    address _LinkToken = 0x20fE562d797A42Dcb3399062AE9546cd06f63280;
-    bytes32 _keyHash =
-        0xced103054e349b8dfb51352f0f8fa9b5d20dde3d06f9f43cb2b85bc64b238205;
-    uint256 _fee = 1000000000000000000;
+    // address _VRFCoordinator = 0xf720CF1B963e0e7bE9F58fd471EFa67e7bF00cfb;
+    // address _LinkToken = 0x20fE562d797A42Dcb3399062AE9546cd06f63280;
+    // bytes32 _keyHash =
+    //     0xced103054e349b8dfb51352f0f8fa9b5d20dde3d06f9f43cb2b85bc64b238205;
+    // uint256 _fee = 1000000000000000000;
 
     // get in constructor some parameters to VRMConsumerBase
-    constructor()
-        VRFConsumerBase(_VRFCoordinator, _LinkToken)
+    constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyHash, uint256 _fee)
+        VRFConsumerBase(0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B, 0x01BE23585060835E02B77ef475b0Cc51aA1e0709)
         ERC721("Nigga NFT", "NiggaNFT")
     {
         keyHash = _keyHash;
@@ -297,28 +228,6 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
             );
     }
 
-    // function mintNFT(
-    //     string memory svg,
-    //     string memory _title,
-    //     string memory _description
-    // ) public returns (uint256) {
-    //     uint256 newItemId = tokenCounter;
-
-    //     // create new NFT by owner(sender) and new NFT id
-    //     _mint(msg.sender, newItemId);
-    //     string memory imageURI = svgToImageURI(svg);
-    //     string memory tokenURI = formatTokenURI(imageURI, _title, _description);
-
-    //     _setTokenURI(newItemId, tokenURI);
-
-    //     emit NFTCreated(newItemId, tokenURI);
-
-    //     tokenCounter++; // increase count of NFT
-
-    //     return newItemId;
-    // }
-
-    // -----------------------------
     function createNFT(string memory _nft_name, string memory _nft_description)
         public
         returns (bytes32 requestId)
@@ -377,68 +286,5 @@ contract NFT is ERC721URIStorage, VRFConsumerBase {
         _setTokenURI(_tokenId, tokenURI);
 
         emit CreatedRandomSVG(_tokenId, svg);
-    }
-}
-
-contract Auction is NFT {
-    address payable private owner;
-    string public title;
-    uint256 public startPrice;
-    // uint256 public startTime; // block.timestamp - time when auction created
-    uint256 public endTime; //time when auction will be closed
-    string public descriprion;
-    uint256 public nftTokenId;
-
-    // create enum type of auction states
-    enum State {
-        Running,
-        Finallized
-    }
-    // create auction state
-    State public auctionState;
-
-    // data of bidder
-    uint256 public highestPrice;
-    address payable public highestBidder;
-
-    // bids list
-    mapping(address => uint256) public bids;
-
-    constructor(
-        address payable _owner,
-        string memory _title,
-        string memory _description,
-        // string memory _svg,
-        uint256 _startPrice,
-        uint256 _duration
-    )  {
-        // set data by input data from constructor parameters
-        owner = _owner;
-        title = _title;
-        descriprion = _description;
-        startPrice = _startPrice;
-        endTime = block.timestamp + _duration; // count end date (now + auction duration)
-
-        // tokenCounter = 0;
-        // nftTokenId = createNFT(_title, _description);
-        createNFT(_title, _description);
-    }
-
-    // just return title of this auction
-    function getTitle() public view returns (string memory) {
-        return title;
-    }
-
-    // return structure of fields this auction
-    function getContent() public view returns (AuctionContent memory) {
-        return
-            AuctionContent(
-                owner,
-                title,
-                descriprion,
-                nftTokenId,
-                startPrice,
-                endTime
-            );
     }
 }
