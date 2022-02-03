@@ -12,44 +12,29 @@ contract NFT is ERC721URIStorage {
     string public nft_name;
     string public nft_description;
 
-    // for VRFConsumerBase
-    bytes32 public keyHash;
-    uint256 public fee;
-
     // svg parameters
-    uint256 public maxNumberOfPaths;
-    uint256 public maxNumberOfPathCommands;
-    uint256 public size;
-    string[] public pathCommands;
-    string[] public colors;
+    uint256 private maxNumberOfPaths;
+    uint256 private maxNumberOfPathCommands;
+    uint256 private size;
+    string[] private pathCommands;
+    string[] private colors;
 
-    mapping(bytes32 => address) public requestIdToSender;
-    mapping(bytes32 => uint256) public requestIdToTokenId;
-    mapping(uint256 => uint256) public tokenIdToRandomNumber;
-
-    event NFTCreated(uint256 newItemId, string tokenURI);
-    event RequestedRandomSVG(
-        bytes32 indexed requestId,
-        uint256 indexed tokenId
-    );
-    event CreatedUnfinishedRandomSVG(
-        uint256 indexed tokenId,
+    event RequestRandomSVG(
+        uint256 numberOfPaths,
         uint256 randomNumber
     );
-    event CreatedRandomSVG(uint256 indexed tokenId, string svg);
 
-    // address _VRFCoordinator = 0xf720CF1B963e0e7bE9F58fd471EFa67e7bF00cfb;
-    // address _LinkToken = 0x20fE562d797A42Dcb3399062AE9546cd06f63280;
-    // bytes32 _keyHash =
-    //     0xced103054e349b8dfb51352f0f8fa9b5d20dde3d06f9f43cb2b85bc64b238205;
-    // uint256 _fee = 1000000000000000000;
+    event CreatedRandomSVG(string svg);
 
-    // get in constructor some parameters to VRMConsumerBase
+    event NFTCreated(uint256 indexed tokenId, string tokenURI);
+
+
     constructor()
         ERC721("Nigga NFT", "NiggaNFT")
     {
         tokenCounter = 0; // count of NFT equals 0 when we deploy contract
 
+        // set default parameters for svg
         maxNumberOfPaths = 10;
         maxNumberOfPathCommands = 5;
         size = 500;
@@ -64,6 +49,8 @@ contract NFT is ERC721URIStorage {
     {
         // get random number of paths
         uint256 numberOfPaths = (_randomNumber % maxNumberOfPaths) + 1;
+
+        emit RequestRandomSVG(numberOfPaths, _randomNumber);
 
         // svg start
         finalSVG = string(
@@ -85,6 +72,8 @@ contract NFT is ERC721URIStorage {
         }
 
         finalSVG = string(abi.encodePacked(finalSVG, "</svg>"));
+
+        emit CreatedRandomSVG(finalSVG);
 
         return finalSVG;
     }
@@ -135,6 +124,7 @@ contract NFT is ERC721URIStorage {
         returns (string memory pathCommand)
     {
         pathCommand = pathCommands[_randomNumber % pathCommands.length];
+
         uint256 parameterOne = uint256(
             keccak256(abi.encode(_randomNumber, size * 2))
         ) % size;
@@ -145,10 +135,10 @@ contract NFT is ERC721URIStorage {
         pathCommand = string(
             abi.encodePacked(
                 pathCommand,
-                " ",
                 uint2str(parameterOne),
                 " ",
-                uint2str(parameterTwo)
+                uint2str(parameterTwo),
+                " "
             )
         );
 
@@ -183,7 +173,7 @@ contract NFT is ERC721URIStorage {
 
     // convert svg string to imageURI
     function svgToImageURI(string memory svg)
-        private
+        internal
         pure
         returns (string memory)
     {
@@ -198,7 +188,7 @@ contract NFT is ERC721URIStorage {
         string memory imageURI,
         string memory name,
         string memory description
-    ) private pure returns (string memory) {
+    ) internal pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -250,9 +240,10 @@ contract NFT is ERC721URIStorage {
 
         _setTokenURI(tokenId, tokenURI);
 
-        emit CreatedRandomSVG(tokenId, svg);
+        emit NFTCreated(tokenId, tokenURI);
 
         tokenCounter++;
+
         return tokenId;
     }
 }
