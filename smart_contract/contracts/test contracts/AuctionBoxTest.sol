@@ -70,6 +70,24 @@ contract AuctionBox {
     }
 }
 
+
+// у нас есть много пользователей - контракт Users
+// В нём будет список пользователь, который будет пополняться - address - User contract
+// Отдельно контракт с nft
+// через Users 
+
+contract User is NFT{
+    address public userAddress;
+
+    constructor (address _address) {
+        userAddress = _address;
+    }
+
+    function createNigga() public payable returns(string memory tokenURI){
+        uint256 nftId = createNFT("John Doe", "This is fucking black nigger!");
+    }
+}
+
 contract NFT is ERC721URIStorage {
     uint256 public tokenCounter; // id of current nft
 
