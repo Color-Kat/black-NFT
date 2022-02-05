@@ -16,26 +16,37 @@ contract Users {
         nftInstance = new NFT();
     }
 
-    // return user by msg.sender
-    // if user already exists, return this
-    // if it is new user, create new User instance and save it
-    function getUser() public returns (User) {
+    event UserConnect(User user);
+
+    // add user address in users list
+    function connectUser() public  {
         address userAddress = msg.sender;
 
-        if(users[userAddress].exists) return users[userAddress].user;
+        if(users[userAddress].exists) emit UserConnect(users[userAddress].user);
         else {
             User user = new User(userAddress, nftInstance);
             users[userAddress].user = user;
             users[userAddress].exists = true;
 
-            return user;
+            emit UserConnect(user);
         }
+
+        // user doesn't exist yet
+        // if(!users[userAddress].exists){
+        //     User user = new User(userAddress, nftInstance);
+        //     users[userAddress].user = user;
+        //     users[userAddress].exists = true;
+        // }
     }
+
+    // function getUser() public view returns (User){
+    //     return users[msg.sender];
+    // }
 }
 
 contract User {
     address public userAddress;
-    NFT private nftInstance ;
+    NFT private nftInstance;
 
     constructor (address _userAddress, NFT _nftInstance) {
         userAddress = _userAddress;
@@ -46,9 +57,11 @@ contract User {
         return "Hi, i have a nigger)";
     }
 
-    function collectNigga() public returns (string memory){
+    event NiggaCollect(string tokenURI);
+
+    function collectNigga() public{
         uint256 tokenId = nftInstance.createNFT(userAddress);
-        return nftInstance.tokenURI(tokenId);
+        emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
 }
 
