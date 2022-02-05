@@ -48,7 +48,7 @@ contract User {
 
     function collectNigga() public returns (string memory){
         uint256 tokenId = nftInstance.createNFT(userAddress);
-        return nftInstance.tokenURI[tokenId];
+        return nftInstance.tokenURI(tokenId);
     }
 }
 
@@ -292,6 +292,4 @@ contract NFT is ERC721URIStorage {
     function getRandomNumber() public view returns (uint256) {
         return uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender)));
     }
-
-   
 }
