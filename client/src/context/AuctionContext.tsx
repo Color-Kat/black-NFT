@@ -60,14 +60,22 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     const connectUser = async () => {
         try {
             if (!checkInstallMetamask()) return;
+            
+            console.log(await userContract("0x084E35B8826C882B51cebBE03A7a874bf6E709e4").sayHello());
 
-            let transactionHash = await usersContract().getUser();
 
-            setIsLoading(true);
-            let result = await transactionHash.wait();
-            setIsLoading(false);
+            // let transactionHash =
+            await usersContract().connectUser();
 
-            console.log(result);
+            // setIsLoading(true);
+            // await transactionHash.wait();
+            // setIsLoading(false);
+
+            usersContract().on("UserConnect", (user) => {
+                console.log(user);
+            });
+
+
 
 
         } catch (error) {
