@@ -54,39 +54,57 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         checkIfWalletConnected
     } = useEth(setError, setInstallMetamask);
 
-    // auctions data
+    // user data
+    const [currentUser, setCurrentUser] = useState<ethers.Contract | null>(null);
+
+    // Auctions data
     const [auctions, setAuctions] = useState([]);
 
+    /**
+     * Connect user to nigga system
+     * Set current user from event "UserConnect"
+     */
     const connectUser = async () => {
         try {
             if (!checkInstallMetamask()) return;
-            
-            console.log(await userContract("0x084E35B8826C882B51cebBE03A7a874bf6E709e4").sayHello());
 
-
-            // let transactionHash =
+            // connect user to nigga system
             await usersContract().connectUser();
+            setIsLoading(true); // turn on the loader
 
-            // setIsLoading(true);
-            // await transactionHash.wait();
-            // setIsLoading(false);
-
+            // listen events to get connected user
             usersContract().on("UserConnect", (user) => {
-                console.log(user);
+                setCurrentUser(userContract(user));
+                setIsLoading(false); // turn off the loader
             });
-
-
-
 
         } catch (error) {
             console.log(error);
-            setError("Не удалось подключить пользователя к системе");
+            setError("Не удалось подключить пользователя к nigga-system");
         }
+    }
 
+    const collectNigga = async () => {
+        try {
+            if (!checkInstallMetamask()) return;
+            if (!currentUser) { setError("Вы не подключились к nigga-system!"); return; }
+
+            await currentUser.collectNigga();
+            setIsLoading(true); // turn on the loader
+
+            currentUser.on("NiggaCollect", (niggaTokenURI) => {
+                console.log(niggaTokenURI);
+                setIsLoading(false); // turn off the loader
+            });
+
+        } catch (error) {
+            console.log(error);
+            setError("Не удалось найти ниггера");
+        }
     }
 
     useEffect(() => {
-        connectUser();
+        // connectUser();
     }, []);
 
     /**
@@ -157,6 +175,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 connectWallet, // function to connect metamask
                 currentAccount, // get current connected account
 
+                currentUser,
+                connectUser,
+                collectNigga,
 
                 getAuctions,
                 createAuction

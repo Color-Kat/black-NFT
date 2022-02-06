@@ -2,7 +2,11 @@ import { useContext, useEffect, useState } from 'react';
 import { AuctionContext } from './context/AuctionContext';
 
 function App() {
-  const { error, connectWallet, installMetamask, currentAccount, getAuctions, createAuction } = useContext(AuctionContext);
+  const {
+    error, isLoading, connectWallet, installMetamask,
+    currentAccount,
+    currentUser, connectUser, collectNigga,
+    getAuctions, createAuction } = useContext(AuctionContext);
 
   // console.log(test);
 
@@ -15,20 +19,23 @@ function App() {
     <div className="App">
       {error &&
         <>
-          <h1>It's ERROR, nigga!</h1>
+          <h1>Возникла ошибка, НИГГА!</h1>
           <h3>{error}</h3>
         </>
       }
 
-      {installMetamask
-        ? <h1>Install metamask, nigger!</h1>
-        : <h2>Hello, nigger</h2>
-      }
+      {installMetamask && <h1>Установи метамаск, Ниггер!</h1>}
 
       {!currentAccount && <button onClick={connectWallet}>Подключить метамаск</button>}
-      {currentAccount && <button onClick={createAuction}>Создать аукцион</button>}
+      {currentAccount && <>
+        {!currentUser && <button onClick={connectUser}>Подключиться к nigga-system</button>}
+        {currentUser && <button onClick={collectNigga}>Найти негра</button>}
+        {/* <button onClick={createAuction}>Создать аукцион</button> */}
+      </>}
 
+      
 
+      {isLoading && <><hr /> <span>Загрузка...</span></>}
     </div>
   )
 }
