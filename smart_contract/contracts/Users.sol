@@ -58,24 +58,27 @@ contract User {
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
 
-    // function getMyNiggas() public {
-    //     uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress);
-    // }
-
-    // return tokenId of nigga by Id
     function getNiggaById(uint256 _id) public view returns (uint256) {
         return nftInstance.getTokenIdsFromAddress(userAddress)[_id];
     }
 
-    function getMyNiggas() public view returns (string[] memory) {
-        uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress);
-        uint256 tokenIdsCount = tokenIds.length;
-        string[] memory NFTs;
+    event GetTokenIds(uint256[] tokenIds, uint256 count);
+    event GetMyNFTs(string[] NFTs);
 
-        // Iterate all tokenIds and save tokenURI to NFTs
+    // return tokenURIs of all my niggas
+    function getMyNiggas() public returns (string[] memory) {
+        uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress); // get tokenIds
+        uint256 tokenIdsCount = tokenIds.length; // number of my niggas
+        string[] memory NFTs = new string[](tokenIdsCount); // init array of tokenURIs
+
+        emit GetTokenIds(tokenIds, tokenIdsCount);
+        
+        // iterate all tokenIds and convert it to tokenURI
         for (uint256 i = 0; i < tokenIdsCount; i++) {
             NFTs[i] = nftInstance.tokenURI(tokenIds[i]);
         }
+
+        emit GetMyNFTs(NFTs);
 
         return NFTs;
     }
@@ -126,7 +129,8 @@ contract NFT is ERC721URIStorage {
 
         emit RequestRandomSVG(randomNumber);
 
-        string memory svg = generateSVG(randomNumber);
+        // string memory svg = generateSVG(randomNumber);
+        string memory svg = "<svg></svg>";
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(
             imageURI,
@@ -147,13 +151,12 @@ contract NFT is ERC721URIStorage {
         return tokenId;
     }
 
-    event UserAddressToTokenId_added( uint256[] tokenIdsList);
+    event Mapp( uint256[] Shit);
     function addTokenIdToUser(address _userAddress, uint256 _tokenId) public {
         userAddressToTokenId[_userAddress].push(_tokenId);
-        emit UserAddressToTokenId_added(userAddressToTokenId[_userAddress]);
+        emit Mapp(userAddressToTokenId[_userAddress]);
     }
 
-    // get tokenIds list by user address from userAddressToTokenId
     function getTokenIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
         return userAddressToTokenId[_userAddress];
     }
