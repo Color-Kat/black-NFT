@@ -11,9 +11,11 @@ contract Users {
     mapping(address => UserData) public users;
 
     NFT public nftInstance;
+    Auctions public auctionInstance;
 
     constructor() {
         nftInstance = new NFT();
+        auctionInstance = new Auctions();
     }
 
     event UserConnect(User user);
@@ -25,7 +27,7 @@ contract Users {
         if (users[userAddress].exists)
             emit UserConnect(users[userAddress].user);
         else {
-            User user = new User(userAddress, nftInstance);
+            User user = new User(userAddress, nftInstance, auctionInstance);
             users[userAddress].user = user;
             users[userAddress].exists = true;
 
@@ -41,10 +43,12 @@ contract Users {
 contract User {
     address public userAddress;
     NFT private nftInstance;
+    Auctions public auctionInstance;
 
-    constructor(address _userAddress, NFT _nftInstance) {
+    constructor(address _userAddress, NFT _nftInstance, Auctions _auctionInstance) {
         userAddress = _userAddress;
         nftInstance = _nftInstance;
+        auctionInstance = _auctionInstance;
     }
 
     function sayHello() public pure returns (string memory) {
@@ -58,30 +62,46 @@ contract User {
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
 
-    function getNiggaById(uint256 _id) public view returns (uint256) {
+    function getNiggaTokenIdById(uint256 _id) public view returns (uint256) {
         return nftInstance.getTokenIdsFromAddress(userAddress)[_id];
     }
 
-    event GetTokenIds(uint256[] tokenIds, uint256 count);
-    event GetMyNFTs(string[] NFTs);
+    function getNiggaById(uint256 _id) public view returns (string memory) {
+        return nftInstance.tokenURI(
+            getNiggaTokenIdById(_id)
+        );
+    }
 
-    // return tokenURIs of all my niggas
+    event GetTokenIds(uint256[] tokenIds, uint256 count);
+
     function getMyNiggas() public returns (string[] memory) {
-        uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress); // get tokenIds
-        uint256 tokenIdsCount = tokenIds.length; // number of my niggas
-        string[] memory NFTs = new string[](tokenIdsCount); // init array of tokenURIs
+        uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress);
+        uint256 tokenIdsCount = tokenIds.length;
 
         emit GetTokenIds(tokenIds, tokenIdsCount);
-        
-        // iterate all tokenIds and convert it to tokenURI
+
+        string[] memory NFTs = new string[](tokenIdsCount);
+
         for (uint256 i = 0; i < tokenIdsCount; i++) {
             NFTs[i] = nftInstance.tokenURI(tokenIds[i]);
         }
 
-        emit GetMyNFTs(NFTs);
-
         return NFTs;
     }
+
+    function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice, uint256 _duration) public {
+        uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
+
+        auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice, _duration);
+    }
+
+    function getMyAuctionIds() public view returns (uint256[] memory) {
+        return auctionInstance.getAuctionIdsFromAddress(userAddress);
+    }
+
+    function getAuctionContentById(uint256 _id) public view returns(AuctionContent memory) {
+        return auctionInstance.getContent(_id);
+    } 
 }
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -156,7 +176,6 @@ contract NFT is ERC721URIStorage {
         userAddressToTokenId[_userAddress].push(_tokenId);
         emit Mapp(userAddressToTokenId[_userAddress]);
     }
-
     function getTokenIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
         return userAddressToTokenId[_userAddress];
     }
@@ -338,6 +357,116 @@ contract NFT is ERC721URIStorage {
                         msg.sender
                     )
                 )
+            );
+    }
+}
+
+struct AuctionContent {
+    address owner;
+    uint256 nftTokenId;
+    string message;
+    uint256 startPrice;
+    uint256 endTime;
+}
+
+contract Auctions {
+    Auction[] public auctions; // auctions array
+    mapping(address => uint256[]) private userAddressToAuctionIds;
+
+    event AuctionCreated(Auction _auction);
+
+    // add to auctions array new Auction instance
+    function createAuction(
+        address _userAddress,
+        uint256 _tokenId,
+        string memory _message,
+        uint256 _startPrice,
+        uint256 _duration //time when auction will be closed
+    ) public payable returns (uint256) {
+        // create new Auction instance
+        Auction newAuction = new Auction(
+            payable(_userAddress),
+            _tokenId,
+            _message,
+            _startPrice,
+            _duration
+        );
+
+        emit AuctionCreated(newAuction);
+
+        auctions.push(newAuction); // Add auction to list
+
+        uint256 auctionId = (auctions.length - 1);
+        userAddressToAuctionIds[_userAddress].push(auctionId);
+
+        return auctionId;
+    }
+
+    function getAuctionIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
+        return userAddressToAuctionIds[_userAddress];
+    }
+
+    // Return our auctions array
+    function getAuctions() public view returns (Auction[] memory) {
+        return auctions;
+    }
+
+    function getAuctionById(uint256 _id) public view returns (Auction) {
+        return auctions[_id];
+    }
+
+    // Return content of auction by id
+    function getContent(uint256 _id)
+        public
+        view
+        returns (AuctionContent memory)
+    {
+        return auctions[_id].getContent();
+    }
+}
+
+contract Auction {
+    address payable public owner;
+    uint256 public nftTokenId;
+    uint256 public startPrice;
+    uint256 public startTime; // block.timestamp - time when auction created
+    uint256 public endTime; //time when auction will be closed
+    string public message;
+   
+    // create enum type of auction states
+    enum State { Running, Finallized }
+    State public auctionState; // create auction state
+
+    // data of bidder
+    uint256 public highestPrice;
+    address payable public highestBidder;
+    mapping(address => uint256) public bids; // bids list
+
+    constructor(
+        address payable _owner,
+        uint256 _nftTokenId,
+        string memory _message,
+        uint256 _startPrice,
+        uint256 _duration
+    ) {
+        // set data by input data from constructor parameters
+        owner = _owner;
+        nftTokenId = _nftTokenId;
+        message = _message;
+        startPrice = _startPrice;
+        startTime = block.timestamp;
+        endTime = block.timestamp + _duration; // count end date (now + auction duration)
+    }
+
+    // return structure of fields this auction
+    function getContent() public view returns (AuctionContent memory) {
+        return
+            AuctionContent(
+                owner,
+                nftTokenId,
+                message,
+                startPrice,
+                endTime
             );
     }
 }
