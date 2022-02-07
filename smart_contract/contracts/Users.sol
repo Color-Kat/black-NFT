@@ -58,12 +58,26 @@ contract User {
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
 
-    function getMyNiggas() public view returns (uint256) {
-        uint256 tokenIdsCount = nftInstance.userAddressToTokenId[userAddress].length;
+    // function getMyNiggas() public {
+    //     uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress);
+    // }
 
-        for (uint256 i = 0; i < tokenIdsCount; i++) {}
+    // return tokenId of nigga by Id
+    function getNiggaById(uint256 _id) public view returns (uint256) {
+        return nftInstance.getTokenIdsFromAddress(userAddress)[_id];
+    }
 
-        return 1;
+    function getMyNiggas() public view returns (string[] memory) {
+        uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress);
+        uint256 tokenIdsCount = tokenIds.length;
+        string[] memory NFTs;
+
+        // Iterate all tokenIds and save tokenURI to NFTs
+        for (uint256 i = 0; i < tokenIdsCount; i++) {
+            NFTs[i] = nftInstance.tokenURI(tokenIds[i]);
+        }
+
+        return NFTs;
     }
 }
 
@@ -72,7 +86,7 @@ import "base64-sol/base64.sol"; // base64 encode
 
 contract NFT is ERC721URIStorage {
     uint256 public tokenCounter; // id of current nft
-    mapping(address => uint256[]) public userAddressToTokenId;
+    mapping(address => uint256[]) private userAddressToTokenId;
 
     // svg parameters
     uint256 private maxNumberOfPaths;
@@ -131,6 +145,17 @@ contract NFT is ERC721URIStorage {
         userAddressToTokenId[userAddress].push(tokenId);
 
         return tokenId;
+    }
+
+    event UserAddressToTokenId_added( uint256[] tokenIdsList);
+    function addTokenIdToUser(address _userAddress, uint256 _tokenId) public {
+        userAddressToTokenId[_userAddress].push(_tokenId);
+        emit UserAddressToTokenId_added(userAddressToTokenId[_userAddress]);
+    }
+
+    // get tokenIds list by user address from userAddressToTokenId
+    function getTokenIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
+        return userAddressToTokenId[_userAddress];
     }
 
     function generateSVG(uint256 _randomNumber)
