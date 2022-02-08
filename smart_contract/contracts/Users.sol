@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract Users {
-    // Data struct to know, what user exists
+    // data struct to know, what user exists
     struct UserData {
         User user;
         bool exists;
@@ -15,12 +15,12 @@ contract Users {
 
     constructor() {
         nftInstance = new NFT();
-        auctionInstance = new Auctions();
+        auctionInstance = new Auctions(nftInstance);
     }
 
     event UserConnect(User user);
 
-    // Add user address in users list
+    // add user address in users list
     function connectUser() public {
         address userAddress = msg.sender;
 
@@ -90,7 +90,7 @@ contract User {
     }
 
     function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice, uint256 _duration) public {
-        uint256 tokenId = getNiggaTokenIdById(_niggaId); // Get tokenId of auction lot
+        uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
 
         auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice, _duration);
     }
@@ -108,10 +108,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "base64-sol/base64.sol"; // base64 encode
 
 contract NFT is ERC721URIStorage {
-    uint256 public tokenCounter; // Id of current nft
+    uint256 public tokenCounter; // id of current nft
     mapping(address => uint256[]) private userAddressToTokenId;
 
-    // SVG parameters
+    // svg parameters
     uint256 private maxNumberOfPaths;
     uint256 private maxNumberOfPathCommands;
     uint256 private size;
@@ -124,9 +124,9 @@ contract NFT is ERC721URIStorage {
     event NFTCreated(uint256 indexed tokenId, string tokenURI);
 
     constructor() ERC721("Nigga NFT", "NiggaNFT") {
-        tokenCounter = 0; // Count of NFT equals 0 when we deploy contract
+        tokenCounter = 0; // count of NFT equals 0 when we deploy contract
 
-        // Set default parameters for svg
+        // set default parameters for svg
         maxNumberOfPaths = 10;
         maxNumberOfPathCommands = 5;
         size = 500;
@@ -135,7 +135,7 @@ contract NFT is ERC721URIStorage {
     }
 
     function createNFT(address userAddress) public returns (uint256) {
-        uint256 randomNumber = getRandomNumber(); // Get id of random number re
+        uint256 randomNumber = getRandomNumber(); // get id of random number re
 
         emit RequestNFT(randomNumber, userAddress);
 
@@ -143,13 +143,13 @@ contract NFT is ERC721URIStorage {
 
         uint256 tokenId = tokenCounter;
 
-        // Save nft name and description to future finishMint
+        // save nft name and description to future finishMint
         string memory nft_name = "nigga";
         string memory nft_description = "Nigga description";
 
         emit RequestRandomSVG(randomNumber);
 
-        // String memory svg = generateSVG(randomNumber);
+        // string memory svg = generateSVG(randomNumber);
         string memory svg = "<svg></svg>";
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(
@@ -176,8 +176,6 @@ contract NFT is ERC721URIStorage {
         userAddressToTokenId[_userAddress].push(_tokenId);
         emit Mapp(userAddressToTokenId[_userAddress]);
     }
-
-    // Return list of tokenIds of userAddress
     function getTokenIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
         return userAddressToTokenId[_userAddress];
     }
@@ -372,21 +370,27 @@ struct AuctionContent {
 }
 
 contract Auctions {
-    Auction[] public auctions; // Auctions array
+    Auction[] public auctions; // auctions array
+    NFT public nftInstance;
     mapping(address => uint256[]) private userAddressToAuctionIds;
 
-    event AuctionCreated(uint256 auctionId, Auction auction);
+    event AuctionCreated(Auction _auction);
 
-    // Add to auctions array new Auction instance
+    constructor(NFT _nftInstance) {
+        nftInstance = _nftInstance;
+    }
+
+    // add to auctions array new Auction instance
     function createAuction(
         address _userAddress,
         uint256 _tokenId,
         string memory _message,
         uint256 _startPrice,
-        uint256 _duration // Time when auction will be closed
+        uint256 _duration //time when auction will be closed
     ) public payable returns (uint256) {
-        // Create new Auction instance
+        // create new Auction instance
         Auction newAuction = new Auction(
+            nftInstance,
             payable(_userAddress),
             _tokenId,
             _message,
@@ -394,27 +398,25 @@ contract Auctions {
             _duration
         );
 
+        emit AuctionCreated(newAuction);
+
         auctions.push(newAuction); // Add auction to list
 
         uint256 auctionId = (auctions.length - 1);
         userAddressToAuctionIds[_userAddress].push(auctionId);
 
-        emit AuctionCreated(auctionId, newAuction);
-
         return auctionId;
     }
 
-    // Return list of auction ids (indexes) of userAddress
     function getAuctionIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
         return userAddressToAuctionIds[_userAddress];
     }
 
-    // Return auctions array
+    // Return our auctions array
     function getAuctions() public view returns (Auction[] memory) {
         return auctions;
     }
 
-    // return auction instance by auctionId
     function getAuctionById(uint256 _id) public view returns (Auction) {
         return auctions[_id];
     }
@@ -434,35 +436,40 @@ contract Auction {
     uint256 public nftTokenId;
     uint256 public startPrice;
     uint256 public startTime; // block.timestamp - time when auction created
-    uint256 public endTime; // Time when auction will be closed
+    uint256 public endTime; //time when auction will be closed
     string public message;
-   
-    // Create enum type of auction states
-    enum State { Running, Finallized }
-    State public auctionState; // Create auction state
 
-    // Data of bidder
+    NFT public nftInstance; // to interact with nft storage
+   
+    // create enum type of auction states
+    enum State { Running, Finallized }
+    State public auctionState; // create auction state
+
+    // data of bidder
     uint256 public highestPrice;
     address payable public highestBidder;
-    mapping(address => uint256) public bids; // Bids list
+    mapping(address => uint256) public bids; // bids list
 
     constructor(
+        NFT _nftInstance,
         address payable _owner,
         uint256 _nftTokenId,
         string memory _message,
         uint256 _startPrice,
         uint256 _duration
     ) {
-        // Set data by input data from constructor parameters
+        // set data by input data from constructor parameters
         owner = _owner;
         nftTokenId = _nftTokenId;
         message = _message;
         startPrice = _startPrice;
         startTime = block.timestamp;
-        endTime = block.timestamp + _duration; // Count end date (now + auction duration)
+        endTime = block.timestamp + _duration; // count end date (now + auction duration)
+
+        nftInstance = _nftInstance;
     }
 
-    // Return structure of fields this auction
+    // return structure of fields this auction
     function getContent() public view returns (AuctionContent memory) {
         return
             AuctionContent(
@@ -472,5 +479,50 @@ contract Auction {
                 startPrice,
                 endTime
             );
+    }
+
+    modifier notOwner(){
+        require(msg.sender != owner);
+        _;
+    }
+
+    event PlaceBid(address bidder, uint256 value);
+
+    // Place bid, update the highest price and highest bidder
+    function placeBid() public payable notOwner returns(bool) {
+        require(auctionState == State.Running, "Auction is already closed");
+        require(msg.value > startPrice, "You must pay more than the starting price");
+        require(msg.value > highestPrice, "Your bid is too low. Increase it");
+
+        emit PlaceBid(msg.sender, msg.value);
+
+        // Add new bid for msg.sender
+        bids[msg.sender] = msg.value;
+        // Update the highest price and highest bidder
+        highestPrice = msg.value;
+        highestBidder = payable(msg.sender);
+        
+        return true;
+    }
+
+    event AuctionFinalized();
+
+    // Finalize the auction, transfer nft to highest bidder and send eth to owner
+    function finalizeAuction() public{
+        // Only owner can finalize the auction
+        require(msg.sender == owner, "You are not owner");
+        
+        // highest bidder is not empry
+        if (highestBidder != address(0)) {
+            uint256 price = highestPrice;
+
+            // transfer nft from owner to highest bidder address
+            nftInstance.transferFrom(owner, highestBidder, nftTokenId);
+
+            owner.transfer(price); // send eth to owner
+        }
+        
+        // No more bids, auction is finalized
+        auctionState = State.Finallized; 
     }
 }
