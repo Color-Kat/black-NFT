@@ -102,6 +102,10 @@ contract User {
     function getAuctionContentById(uint256 _id) public view returns(AuctionContent memory) {
         return auctionInstance.getContent(_id);
     } 
+
+    function finalizeAuction(uint256 _auctionId) public {
+        auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+    }
 }
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -140,6 +144,7 @@ contract NFT is ERC721URIStorage {
         emit RequestNFT(randomNumber, userAddress);
 
         _mint(userAddress, tokenCounter);
+        setApprovalForAll(address(this), true);
 
         uint256 tokenId = tokenCounter;
 
@@ -508,13 +513,17 @@ contract Auction {
     event AuctionFinalized();
 
     // Finalize the auction, transfer nft to highest bidder and send eth to owner
-    function finalizeAuction() public{
+    function finalizeAuction() public {
         // Only owner can finalize the auction
-        require(msg.sender == owner, "You are not owner");
+        // require(msg.sender == owner, "You are not owner");
+
+
         
         // highest bidder is not empry
         if (highestBidder != address(0)) {
             uint256 price = highestPrice;
+
+            // nftInstance.setApprovalForAll(address(this), true);
 
             // transfer nft from owner to highest bidder address
             nftInstance.transferFrom(owner, highestBidder, nftTokenId);
