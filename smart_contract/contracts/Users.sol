@@ -62,6 +62,9 @@ contract User {
         require(msg.sender == userAddress, "You are wrong user");
 
         uint256 tokenId = nftInstance.createNFT(userAddress);
+
+        nftInstance.setApprovalForAll(address(auctionInstance), true);
+
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
 
@@ -119,6 +122,12 @@ contract User {
         require(msg.sender == userAddress, "You are wrong user");
 
         auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+    }
+
+    function placeBid(uint256 _auctionId) public {
+        require(msg.sender == userAddress, "You are wrong user");
+
+        auctionInstance.getAuctionById(_auctionId).placeBid();
     }
 }
 
@@ -198,7 +207,12 @@ contract NFT is ERC721URIStorage {
         return userAddressToTokenId[_userAddress];
     }
 
+    event WhoIsSenderInNFT(address sender, address owner, address NFTAddress);
+
     function niggaTransfer(address _from, address _to, uint256 _tokenId) public {
+        emit WhoIsSenderInNFT(msg.sender, ownerOf(_tokenId), address(this));
+
+
         setApprovalForAll(address(this), true);
         transferFrom(_from, _to, _tokenId);
 
@@ -434,6 +448,8 @@ contract Auctions {
 
         emit AuctionCreated(newAuction);
 
+        nftInstance.setApprovalForAll(address(newAuction), true);
+
         auctions.push(newAuction); // Add auction to list
 
         uint256 auctionId = (auctions.length - 1);
@@ -541,14 +557,15 @@ contract Auction {
         return true;
     }
 
-    event AuctionFinalized();
+    event AuctionFinalized(address oldOwner, address newOwner, uint256 tokenId);
+    event WhoIsSenderInAuction(address sender, address owner, address auctionAddress);
 
     // Finalize the auction, transfer nft to highest bidder and send eth to owner
     function finalizeAuction() public {
         // Only owner can finalize the auction
         // require(msg.sender == owner, "You are not owner");
 
-        
+        emit WhoIsSenderInAuction(msg.sender, owner, address(this));
 
         // highest bidder is not empry
         if (highestBidder != address(0)) {
@@ -564,5 +581,7 @@ contract Auction {
         
         // No more bids, auction is finalized
         auctionState = State.Finallized; 
+
+        emit AuctionFinalized(owner, highestBidder, nftTokenId);
     }
 }
