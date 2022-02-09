@@ -124,7 +124,7 @@ contract User {
         auctionInstance.getAuctionById(_auctionId).finalizeAuction();
     }
 
-    function placeBid(uint256 _auctionId) public {
+    function placeBid(uint256 _auctionId) public payable {
         require(msg.sender == userAddress, "You are wrong user");
 
         auctionInstance.getAuctionById(_auctionId).placeBid();
