@@ -63,7 +63,8 @@ contract User {
 
         uint256 tokenId = nftInstance.createNFT(userAddress);
 
-        nftInstance.setApprovalForAll(address(auctionInstance), true);
+         nftInstance.setApprovalForAll(address(auctionInstance), true);
+        nftInstance.setApprovalForAll(userAddress, true);
 
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
@@ -110,11 +111,12 @@ contract User {
     }
 
     function getMyAuctionIds() public view returns (uint256[] memory) {
-
+        require(msg.sender == userAddress, "You are wrong user");
         return auctionInstance.getAuctionIdsFromAddress(userAddress);
     }
 
     function getAuctionContentById(uint256 _id) public view returns(AuctionContent memory) {
+        require(msg.sender == userAddress, "You are wrong user");
         return auctionInstance.getContent(_id);
     } 
 
@@ -167,6 +169,8 @@ contract NFT is ERC721URIStorage {
         emit RequestNFT(randomNumber, userAddress);
 
         _mint(userAddress, tokenCounter);
+
+        setApprovalForAll(userAddress, true);
 
         uint256 tokenId = tokenCounter;
 
@@ -585,3 +589,5 @@ contract Auction {
         emit AuctionFinalized(owner, highestBidder, nftTokenId);
     }
 }
+
+// question on stack overflow
