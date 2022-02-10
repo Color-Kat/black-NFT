@@ -42,7 +42,7 @@ contract Users {
 
 contract User {
     address public userAddress;
-    NFT private nftInstance;
+    NFT public nftInstance;
     Auctions public auctionInstance;
 
     constructor(address _userAddress, NFT _nftInstance, Auctions _auctionInstance) {
@@ -63,8 +63,8 @@ contract User {
 
         uint256 tokenId = nftInstance.createNFT(userAddress);
 
-         nftInstance.setApprovalForAll(address(auctionInstance), true);
-        nftInstance.setApprovalForAll(userAddress, true);
+        nftInstance.niggaApproving(address(userAddress));
+        nftInstance.niggaApproving(address(auctionInstance));
 
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
@@ -202,6 +202,10 @@ contract NFT is ERC721URIStorage {
         return tokenId;
     }
 
+    function niggaApproving(address approved) public {
+        setApprovalForAll(approved, true);
+    }
+
     event Mapp( uint256[] Shit);
     function addTokenIdToUser(address _userAddress, uint256 _tokenId) public {
         userAddressToTokenId[_userAddress].push(_tokenId);
@@ -215,7 +219,6 @@ contract NFT is ERC721URIStorage {
 
     function niggaTransfer(address _from, address _to, uint256 _tokenId) public {
         emit WhoIsSenderInNFT(msg.sender, ownerOf(_tokenId), address(this));
-
 
         setApprovalForAll(address(this), true);
         transferFrom(_from, _to, _tokenId);
@@ -452,7 +455,7 @@ contract Auctions {
 
         emit AuctionCreated(newAuction);
 
-        nftInstance.setApprovalForAll(address(newAuction), true);
+        nftInstance.niggaApproving(address(newAuction));
 
         auctions.push(newAuction); // Add auction to list
 
@@ -589,5 +592,3 @@ contract Auction {
         emit AuctionFinalized(owner, highestBidder, nftTokenId);
     }
 }
-
-// question on stack overflow
