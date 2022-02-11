@@ -123,13 +123,15 @@ contract User {
     function finalizeAuction(uint256 _auctionId) public {
         require(msg.sender == userAddress, "You are wrong user");
 
+        nftInstance.niggaApproving(address(auctionInstance.getAuctionById(_auctionId)));
+
         auctionInstance.getAuctionById(_auctionId).finalizeAuction();
     }
 
     function placeBid(uint256 _auctionId) public payable {
         require(msg.sender == userAddress, "You are wrong user");
 
-        auctionInstance.getAuctionById(_auctionId).placeBid();
+        auctionInstance.getAuctionById(_auctionId).placeBid(payable(msg.sender), msg.value);
     }
 }
 
@@ -161,7 +163,7 @@ contract NFT is ERC721URIStorage {
         size = 500;
         pathCommands = ["M", "L"];
         colors = ["#fcba03", "#3163eb", "#479900", "black"];
-    }
+    } 
 
     function createNFT(address userAddress) public returns (uint256) {
         uint256 randomNumber = getRandomNumber(); // get id of random number re
@@ -220,8 +222,8 @@ contract NFT is ERC721URIStorage {
     function niggaTransfer(address _from, address _to, uint256 _tokenId) public {
         emit WhoIsSenderInNFT(msg.sender, ownerOf(_tokenId), address(this));
 
-        setApprovalForAll(address(this), true);
-        transferFrom(_from, _to, _tokenId);
+        // transferFrom(_from, _to, _tokenId);
+        transferFrom(ownerOf(_tokenId), _to, _tokenId);
 
         // transfer id in userAddressToTokenId
         uint256[] memory userTokenIds = userAddressToTokenId[_from];
@@ -455,12 +457,13 @@ contract Auctions {
 
         emit AuctionCreated(newAuction);
 
-        nftInstance.niggaApproving(address(newAuction));
-
         auctions.push(newAuction); // Add auction to list
 
         uint256 auctionId = (auctions.length - 1);
         userAddressToAuctionIds[_userAddress].push(auctionId);
+
+        nftInstance.niggaApproving(address(newAuction));
+        nftInstance.niggaApproving(address(auctions[auctionId]));
 
         return auctionId;
     }
@@ -548,18 +551,18 @@ contract Auction {
     event PlaceBid(address bidder, uint256 value);
 
     // Place bid, update the highest price and highest bidder
-    function placeBid() public payable notOwner returns(bool) {
+    function placeBid(address payable _sender, uint256 _value) public payable notOwner returns(bool) {
         require(auctionState == State.Running, "Auction is already closed");
-        require(msg.value > startPrice, "You must pay more than the starting price");
-        require(msg.value > highestPrice, "Your bid is too low. Increase it");
+        require(_value > startPrice, "You must pay more than the starting price");
+        require(_value > highestPrice, "Your bid is too low. Increase it");
 
-        emit PlaceBid(msg.sender, msg.value);
+        emit PlaceBid(_sender, _value);
 
         // Add new bid for msg.sender
-        bids[msg.sender] = msg.value;
+        bids[_sender] = _value;
         // Update the highest price and highest bidder
-        highestPrice = msg.value;
-        highestBidder = payable(msg.sender);
+        highestPrice = _value;
+        highestBidder = _sender;
         
         return true;
     }
