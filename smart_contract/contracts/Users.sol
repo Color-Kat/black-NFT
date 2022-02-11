@@ -107,7 +107,9 @@ contract User {
 
         uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
 
-        auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice, _duration);
+        uint256 auctionId = auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice, _duration);
+
+        nftInstance.niggaApproving(address(auctionInstance.getAuctionById(auctionId)));
     }
 
     function getMyAuctionIds() public view returns (uint256[] memory) {
@@ -462,9 +464,6 @@ contract Auctions {
         uint256 auctionId = (auctions.length - 1);
         userAddressToAuctionIds[_userAddress].push(auctionId);
 
-        nftInstance.niggaApproving(address(newAuction));
-        nftInstance.niggaApproving(address(auctions[auctionId]));
-
         return auctionId;
     }
 
@@ -580,8 +579,6 @@ contract Auction {
         // highest bidder is not empry
         if (highestBidder != address(0)) {
             uint256 price = highestPrice;
-
-            // nftInstance.setApprovalForAll(address(this), true);
 
             // transfer nft from owner to highest bidder address
             nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
