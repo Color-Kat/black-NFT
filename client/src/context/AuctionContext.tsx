@@ -86,22 +86,55 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
     const collectNigga = async () => {
         try {
-            if (!checkInstallMetamask()) return;
-            if (!currentUser) { setError("Вы не подключились к nigga-system!"); return; }
+            if (!checkInstallMetamask()) return false;
+            if (!currentUser) { setError("Вы не подключились к nigga-system!"); return false; }
 
             await currentUser.collectNigga();
             setIsLoading(true); // turn on the loader
 
+            let result: string = '';
+
             currentUser.on("NiggaCollect", (niggaTokenURI) => {
                 console.log(niggaTokenURI);
                 setIsLoading(false); // turn off the loader
+                result = niggaTokenURI;
             });
 
+            return result;
         } catch (error) {
             console.log(error);
             setError("Не удалось найти ниггера");
+            return false;
         }
     }
+
+    const createAuction = async (niggaId: number, message: string, startPrice: number) => {
+        try {
+            if (!checkInstallMetamask()) return false;
+            if (!currentUser) { setError("Вы не подключились к nigga-system!"); return false; }
+
+            // request to create new auction (sellNigga)
+            const transactionHash = await currentUser.sellNigga(niggaId, message, startPrice);
+
+            setIsLoading(true);
+            await transactionHash.wait(); // wait the transaction ends
+            setIsLoading(true);
+
+            // get auctionId of created auction
+            let auctionId: number = 0;
+            currentUser.on("AuctionCreated", (auction_id: number) => {
+                auctionId = auction_id;
+            });
+
+            return auctionId;
+        } catch (error) {
+            console.log(error);
+            setError("Не удалось создать аукцион");
+            return false;
+        }
+    }
+
+
 
     useEffect(() => {
         // connectUser();
@@ -125,7 +158,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         //     setAuctions(auctionsList);
     };
 
-    const createAuction = async () => {
+    // const createAuction = async () => {
         //     try {
         //         if (!checkInstallMetamask) return;
 
@@ -161,7 +194,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
         //         setError("Не удалось создать транзакцию");
         //     }
-    };
+    // };
 
     // if (auctionBox.methods)
     //     auctionBox.methods.getAutcions().call().then(res => console.log(res));

@@ -107,7 +107,7 @@ contract User {
 
         uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
 
-        uint256 auctionId = auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice, _duration);
+        uint256 auctionId = auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice);
 
         nftInstance.niggaApproving(address(auctionInstance.getAuctionById(auctionId)));
     }
@@ -162,7 +162,7 @@ contract NFT is ERC721URIStorage {
         // set default parameters for svg
         maxNumberOfPaths = 10;
         maxNumberOfPathCommands = 5;
-        size = 500;
+        size = 500; 
         pathCommands = ["M", "L"];
         colors = ["#fcba03", "#3163eb", "#479900", "black"];
     } 
@@ -172,7 +172,7 @@ contract NFT is ERC721URIStorage {
 
         emit RequestNFT(randomNumber, userAddress);
 
-        _mint(userAddress, tokenCounter);
+        _mint(tx.origin, tokenCounter);
 
         setApprovalForAll(userAddress, true);
 
@@ -444,8 +444,7 @@ contract Auctions {
         address _userAddress,
         uint256 _tokenId,
         string memory _message,
-        uint256 _startPrice,
-        uint256 _duration //time when auction will be closed
+        uint256 _startPrice
     ) public payable returns (uint256) {
         // create new Auction instance
         Auction newAuction = new Auction(
@@ -453,8 +452,7 @@ contract Auctions {
             payable(_userAddress),
             _tokenId,
             _message,
-            _startPrice,
-            _duration
+            _startPrice
         );
 
         emit AuctionCreated(newAuction);
@@ -495,7 +493,6 @@ contract Auction {
     uint256 public nftTokenId;
     uint256 public startPrice;
     uint256 public startTime; // block.timestamp - time when auction created
-    uint256 public endTime; //time when auction will be closed
     string public message;
 
     NFT public nftInstance; // to interact with nft storage
@@ -514,8 +511,7 @@ contract Auction {
         address payable _owner,
         uint256 _nftTokenId,
         string memory _message,
-        uint256 _startPrice,
-        uint256 _duration
+        uint256 _startPrice
     ) {
         // set data by input data from constructor parameters
         owner = _owner;
@@ -523,11 +519,8 @@ contract Auction {
         message = _message;
         startPrice = _startPrice;
         startTime = block.timestamp;
-        endTime = block.timestamp + _duration; // count end date (now + auction duration)
 
         nftInstance = _nftInstance;
-
-        // nftInstance.setApprovalForAll(address(this), true);
     }
 
     // return structure of fields this auction
@@ -573,6 +566,9 @@ contract Auction {
     function finalizeAuction() public {
         // Only owner can finalize the auction
         // require(msg.sender == owner, "You are not owner");
+
+        nftInstance.niggaApproving(msg.sender);
+        nftInstance.niggaApproving(owner);
 
         emit WhoIsSenderInAuction(msg.sender, owner, address(this));
 
