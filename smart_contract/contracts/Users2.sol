@@ -103,7 +103,7 @@ contract User {
         return NFTs;
     }
 
-    function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice, uint256 _duration) public {
+    function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice) public {
         require(msg.sender == userAddress, "You are wrong user");
 
         uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
@@ -125,18 +125,27 @@ contract User {
         return auctionInstance.getContent(_id);
     } 
 
-    function finalizeAuction(uint256 _auctionId) public {
+    function finalizeAuction(uint256 _auctionId) public payable {
         require(msg.sender == userAddress, "You are wrong user");
 
-        nftInstance.niggaApproving(address(auctionInstance.getAuctionById(_auctionId)));
+        // nftInstance.niggaApproving(address(auctionInstance.getAuctionById(_auctionId)));
 
-        auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+        (bool isTransfer, address owner, address highestBidder, uint256 nftTokenId) = auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+
+        // there is bidder
+        if(isTransfer) {
+            nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
+        }
     }
 
     function placeBid(uint256 _auctionId) public payable {
         require(msg.sender == userAddress, "You are wrong user");
 
-        auctionInstance.getAuctionById(_auctionId).placeBid(payable(msg.sender), msg.value);
+        Auction auction = auctionInstance.getAuctionById(_auctionId);
+
+        auction.placeBid{value: msg.value}(payable(msg.sender), msg.value);
+        // payable(address(auction)).transfer(msg.value);
+
     }
 }
 
@@ -175,7 +184,7 @@ contract NFT is ERC721URIStorage {
 
         emit RequestNFT(randomNumber, userAddress);
 
-        _mint(tx.origin, tokenCounter);
+        _mint(userAddress, tokenCounter);
 
         setApprovalForAll(userAddress, true);
 
@@ -428,7 +437,6 @@ struct AuctionContent {
     uint256 nftTokenId;
     string message;
     uint256 startPrice;
-    uint256 endTime;
 }
 
 contract Auctions {
@@ -533,8 +541,7 @@ contract Auction {
                 owner,
                 nftTokenId,
                 message,
-                startPrice,
-                endTime
+                startPrice
             );
     }
 
@@ -566,9 +573,11 @@ contract Auction {
     event WhoIsSenderInAuction(address sender, address owner, address auctionAddress);
 
     // Finalize the auction, transfer nft to highest bidder and send eth to owner
-    function finalizeAuction() public {
+    function finalizeAuction() public payable returns (bool, address, address, uint256){
         // Only owner can finalize the auction
-        // require(msg.sender == owner, "You are not owner");
+        require(tx.origin == owner, "You are not owner");
+
+        bool isTransfer = false;
 
         nftInstance.niggaApproving(msg.sender);
         nftInstance.niggaApproving(owner);
@@ -580,7 +589,9 @@ contract Auction {
             uint256 price = highestPrice;
 
             // transfer nft from owner to highest bidder address
-            nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
+            // nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
+
+            isTransfer = true;
 
             owner.transfer(price); // send eth to owner
         }
@@ -589,5 +600,54 @@ contract Auction {
         auctionState = State.Finallized; 
 
         emit AuctionFinalized(owner, highestBidder, nftTokenId);
+
+        return (
+            isTransfer,
+            owner,
+            highestBidder,
+            nftTokenId
+        );
     }
+
+    // function canFinalizeAuction() public returns (bool, address, address, uint256){
+    //     // Only owner can finalize the auction
+    //     require(tx.origin == owner, "You are not owner");
+
+    //     bool isTransfer = false;
+    //     uint256 price = 0;
+
+    //     nftInstance.niggaApproving(msg.sender);
+    //     nftInstance.niggaApproving(owner);
+
+    //     emit WhoIsSenderInAuction(msg.sender, owner, address(this));
+
+    //     // highest bidder is not empry
+    //     if (highestBidder != address(0)) {
+    //         uint256 price = highestPrice;
+
+    //         // transfer nft from owner to highest bidder address
+    //         // nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
+
+    //         isTransfer = true;
+
+    //         owner.transfer(price); // send eth to owner
+    //     }
+        
+    //     return (
+    //         isTransfer,
+    //         owner,
+    //         highestBidder,
+    //         price,
+    //         nftTokenId
+    //     );
+    // }
+
+    // function finalizeAuction() public {
+    //     require(tx.origin == owner, "You are not owner");
+
+    //     // No more bids, auction is finalized
+    //     auctionState = State.Finallized; 
+
+    //     emit AuctionFinalized(owner, highestBidder, nftTokenId);
+    // }
 }
