@@ -2,13 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract Users {
-    // data struct to know, what user exists
-    struct UserData {
-        User user;
-        bool exists;
-    }
-
-    mapping(address => UserData) public users;
+    mapping(address => User) public users;
 
     NFT public nftInstance;
     Auctions public auctionInstance;
@@ -24,19 +18,18 @@ contract Users {
     function connectUser() public {
         address userAddress = msg.sender;
 
-        if (users[userAddress].exists)
-            emit UserConnect(users[userAddress].user);
+        if (address(users[userAddress]) != address(0))
+            emit UserConnect(users[userAddress]);
         else {
             User user = new User(userAddress, nftInstance, auctionInstance);
-            users[userAddress].user = user;
-            users[userAddress].exists = true;
+            users[userAddress] = user;
 
             emit UserConnect(user);
         }
     }
 
     function getUser(address _userAddress) public view returns (User) {
-        return users[_userAddress].user;
+        return users[_userAddress];
     }
 }
 
@@ -103,7 +96,7 @@ contract User {
         return NFTs;
     }
 
-    function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice, uint256 _duration) public {
+    function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice) public {
         require(msg.sender == userAddress, "You are wrong user");
 
         uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
@@ -175,7 +168,7 @@ contract NFT is ERC721URIStorage {
 
         emit RequestNFT(randomNumber, userAddress);
 
-        _mint(tx.origin, tokenCounter);
+        _mint(userAddress, tokenCounter);
 
         setApprovalForAll(userAddress, true);
 
@@ -428,7 +421,6 @@ struct AuctionContent {
     uint256 nftTokenId;
     string message;
     uint256 startPrice;
-    uint256 endTime;
 }
 
 contract Auctions {
@@ -533,8 +525,7 @@ contract Auction {
                 owner,
                 nftTokenId,
                 message,
-                startPrice,
-                endTime
+                startPrice
             );
     }
 
