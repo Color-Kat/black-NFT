@@ -214,10 +214,10 @@ contract NFT is ERC721URIStorage {
         uint256[] memory userTokenIds = userAddressToTokenId[_from];
         uint256 userTokenIdsCount = userTokenIds.length;
 
-        // Transfet tokenId in userAddressToTokenId mapping 
+        // Transfer tokenId in userAddressToTokenId mapping 
         for (uint256 i = 0; i < userTokenIdsCount; i++) {
             if (userTokenIds[i] == _tokenId) {
-                delete userAddressToTokenId[_from][i]; // Delete for current user this tokenId
+                delete userAddressToTokenId[_from][i]; // Delete for current user this tokenId // TODO
                 userAddressToTokenId[_to].push(_tokenId); // Add this tokenId for new owner
             }
         }
@@ -570,3 +570,4 @@ contract Auction {
         return true;
     }
 }
+// WE NEED TO APPROVE NO FROM USER CONTRACKT, BUT DIRECTRLY FROM USER ADDRES!!!
