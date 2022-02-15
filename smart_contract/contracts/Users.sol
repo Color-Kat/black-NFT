@@ -8,19 +8,20 @@ contract Users {
     Auctions public auctionInstance;
 
     constructor() {
+        // Create instances to have access to general storage of NFTs and auctions
         nftInstance = new NFT();
         auctionInstance = new Auctions(nftInstance);
     }
 
     event UserConnect(User user);
 
-    // add user address in users list
+    // Add user address in users list
     function connectUser() public {
         address userAddress = msg.sender;
 
-        if (address(users[userAddress]) != address(0))
-            emit UserConnect(users[userAddress]);
+        if (address(users[userAddress]) != address(0)) emit UserConnect(users[userAddress]); // User already exists
         else {
+            // Create new user
             User user = new User(userAddress, nftInstance, auctionInstance);
             users[userAddress] = user;
 
@@ -44,48 +45,41 @@ contract User {
         auctionInstance = _auctionInstance;
     }
 
-    function sayHello() public view returns (string memory) {
-        require(msg.sender == userAddress, "You are wrong user");
-        return "Hi, i have a nigger)";
-    }
-
     event NiggaCollect(string tokenURI);
-    event AuctionCreated(uint256 auctionId);
-
     function collectNigga() public {
         require(msg.sender == userAddress, "You are wrong user");
 
+        // Create new nft and get tokentID and emit tokenURI
         uint256 tokenId = nftInstance.createNFT(userAddress);
-
-        nftInstance.niggaApproving(address(userAddress));
-        nftInstance.niggaApproving(address(auctionInstance));
-
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
     }
 
     function getNiggaTokenIdById(uint256 _id) public view returns (uint256) {
         require(msg.sender == userAddress, "You are wrong user");
-
-        return nftInstance.getTokenIdsFromAddress(userAddress)[_id];
+        return nftInstance.getTokenIdsFromAddress(userAddress)[_id]; // Return tokenId by index
     }
 
     function getNiggaById(uint256 _id) public view returns (string memory) {
         require(msg.sender == userAddress, "You are wrong user");
-
         return nftInstance.tokenURI(
             getNiggaTokenIdById(_id)
         );
     }
 
-    event GetTokenIds(uint256[] tokenIds, uint256 count);
-
-    function getMyNiggas() public returns (string[] memory) {
+    // Return list of user's nigga-tokenIDs
+    function getMyNiggaTokenIds() public view returns ( uint256[] memory) {
         require(msg.sender == userAddress, "You are wrong user");
 
-        uint256[] memory tokenIds = nftInstance.getTokenIdsFromAddress(userAddress);
-        uint256 tokenIdsCount = tokenIds.length;
+        return nftInstance.getTokenIdsFromAddress(userAddress);
+    }
 
-        emit GetTokenIds(tokenIds, tokenIdsCount);
+    // event GetTokenIds(uint256[] tokenIds, uint256 count);
+
+    // Return list of nigga-tokenURIs
+    event GetNiggasTokenURI_list(uint256[] tokenIds, string[] tokenURI_list);
+    function getMyNiggasTokenURI() public {
+        uint256[] memory tokenIds = getMyNiggaTokenIds();
+        uint256 tokenIdsCount = tokenIds.length;
 
         string[] memory NFTs = new string[](tokenIdsCount);
 
@@ -93,43 +87,52 @@ contract User {
             NFTs[i] = nftInstance.tokenURI(tokenIds[i]);
         }
 
-        return NFTs;
+        emit GetNiggasTokenURI_list(tokenIds, NFTs);
     }
-
+    
+    // Create new auction of niggaId with message and start price
+    event AuctionCreated(uint256 auctionId);
     function sellNigga(uint256 _niggaId, string memory _message, uint256 _startPrice) public {
         require(msg.sender == userAddress, "You are wrong user");
 
-        uint256 tokenId = getNiggaTokenIdById(_niggaId); // get tokenId of auction lot
+        uint256 tokenId = getNiggaTokenIdById(_niggaId); // Get tokenId of auction lot
 
         uint256 auctionId = auctionInstance.createAuction(userAddress, tokenId, _message, _startPrice);
-
-        nftInstance.niggaApproving(address(auctionInstance.getAuctionById(auctionId))); // approve nft transfering for new auction contract
 
         emit AuctionCreated(auctionId);
     }
 
+    // Return list of ids of my auction 
     function getMyAuctionIds() public view returns (uint256[] memory) {
         require(msg.sender == userAddress, "You are wrong user");
         return auctionInstance.getAuctionIdsFromAddress(userAddress);
     }
 
+    // Return content of auction by auctionId
     function getAuctionContentById(uint256 _id) public view returns(AuctionContent memory) {
         require(msg.sender == userAddress, "You are wrong user");
         return auctionInstance.getContent(_id);
     } 
 
-    function finalizeAuction(uint256 _auctionId) public {
+    // Finalize the auction by id, trandfer eth to owner and transfer nft to highest bidder
+    event AuctionFinalazed(bool result);
+    function finalizeAuction(uint256 _auctionId) public returns (bool){
         require(msg.sender == userAddress, "You are wrong user");
-
-        nftInstance.niggaApproving(address(auctionInstance.getAuctionById(_auctionId)));
-
-        auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+        bool result = auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+        
+        emit AuctionFinalazed(result);
+        return result;
     }
 
+    // place the bid in the auction by id
+    event PlaceBid(bool result);
     function placeBid(uint256 _auctionId) public payable {
         require(msg.sender == userAddress, "You are wrong user");
 
-        auctionInstance.getAuctionById(_auctionId).placeBid(payable(msg.sender), msg.value);
+        Auction auction = auctionInstance.getAuctionById(_auctionId);
+        bool result = auction.placeBid{value: msg.value}(payable(msg.sender), msg.value); // call auction.placeBid with eth value
+
+        emit PlaceBid(result);
     }
 }
 
@@ -168,9 +171,9 @@ contract NFT is ERC721URIStorage {
 
         emit RequestNFT(randomNumber, userAddress);
 
-        _mint(userAddress, tokenCounter);
+        _mint(userAddress, tokenCounter); // mint the nft to user
 
-        setApprovalForAll(userAddress, true);
+        // setApprovalForAll(userAddress, true); 
 
         uint256 tokenId = tokenCounter;
 
@@ -180,6 +183,7 @@ contract NFT is ERC721URIStorage {
 
         emit RequestRandomSVG(randomNumber);
 
+        // Generate nigga svg
         // string memory svg = generateSVG(randomNumber);
         string memory svg = "<svg></svg>";
         string memory imageURI = svgToImageURI(svg);
@@ -188,48 +192,32 @@ contract NFT is ERC721URIStorage {
             nft_name,
             nft_description
         );
-
         emit CreatedRandomSVG(svg);
 
-        _setTokenURI(tokenId, tokenURI);
-
+        _setTokenURI(tokenId, tokenURI); // Add tokenURI to nft
         emit NFTCreated(tokenId, tokenURI);
 
-        tokenCounter++;
-
-        userAddressToTokenId[userAddress].push(tokenId);
+        tokenCounter++; // Increase token counter
+        userAddressToTokenId[userAddress].push(tokenId); // save created tokenId for user address
 
         return tokenId;
     }
 
-    function niggaApproving(address approved) public {
-        setApprovalForAll(approved, true);
-    }
-
-    event Mapp( uint256[] Shit);
-    function addTokenIdToUser(address _userAddress, uint256 _tokenId) public {
-        userAddressToTokenId[_userAddress].push(_tokenId);
-        emit Mapp(userAddressToTokenId[_userAddress]);
-    }
     function getTokenIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
         return userAddressToTokenId[_userAddress];
     }
 
-    event WhoIsSenderInNFT(address sender, address owner, address NFTAddress);
-
     function niggaTransfer(address _from, address _to, uint256 _tokenId) public {
-        emit WhoIsSenderInNFT(msg.sender, ownerOf(_tokenId), address(this));
-
-        // transferFrom(_from, _to, _tokenId);
         transferFrom(ownerOf(_tokenId), _to, _tokenId);
 
-        // transfer id in userAddressToTokenId
+        // Transfer id in userAddressToTokenId
         uint256[] memory userTokenIds = userAddressToTokenId[_from];
         uint256 userTokenIdsCount = userTokenIds.length;
 
+        // Transfet tokenId in userAddressToTokenId mapping 
         for (uint256 i = 0; i < userTokenIdsCount; i++) {
             if (userTokenIds[i] == _tokenId) {
-                delete userAddressToTokenId[_from][i]; // delete for current user this tokenId
+                delete userAddressToTokenId[_from][i]; // Delete for current user this tokenId
                 userAddressToTokenId[_to].push(_tokenId); // Add this tokenId for new owner
             }
         }
@@ -402,6 +390,7 @@ contract NFT is ERC721URIStorage {
             );
     }
 
+    // Create pseudo random number
     function getRandomNumber() public view returns (uint256) {
         return
             uint256(
@@ -424,24 +413,25 @@ struct AuctionContent {
 }
 
 contract Auctions {
-    Auction[] public auctions; // auctions array
+    Auction[] public auctions; // Auctions array
     NFT public nftInstance;
     mapping(address => uint256[]) private userAddressToAuctionIds;
 
-    event AuctionCreated(Auction _auction);
+   
 
     constructor(NFT _nftInstance) {
         nftInstance = _nftInstance;
     }
 
-    // add to auctions array new Auction instance
+    // Add to auctions array new Auction instance
+    event AuctionCreated(Auction auction, uint256 auctionId);
     function createAuction(
         address _userAddress,
         uint256 _tokenId,
         string memory _message,
         uint256 _startPrice
     ) public payable returns (uint256) {
-        // create new Auction instance
+        // Create new Auction instance
         Auction newAuction = new Auction(
             nftInstance,
             payable(_userAddress),
@@ -450,25 +440,27 @@ contract Auctions {
             _startPrice
         );
 
-        emit AuctionCreated(newAuction);
-
         auctions.push(newAuction); // Add auction to list
 
         uint256 auctionId = (auctions.length - 1);
         userAddressToAuctionIds[_userAddress].push(auctionId);
 
+        emit AuctionCreated(newAuction, auctionId);
+
         return auctionId;
     }
 
+    // Return list of auctionIds of userAddress
     function getAuctionIdsFromAddress(address _userAddress) public view returns(uint256[] memory) {
         return userAddressToAuctionIds[_userAddress];
     }
 
-    // Return our auctions array
+    // Return our auctions array fully
     function getAuctions() public view returns (Auction[] memory) {
         return auctions;
     }
 
+    // Return Auction addres by auctionId
     function getAuctionById(uint256 _id) public view returns (Auction) {
         return auctions[_id];
     }
@@ -490,16 +482,16 @@ contract Auction {
     uint256 public startTime; // block.timestamp - time when auction created
     string public message;
 
-    NFT public nftInstance; // to interact with nft storage
+    NFT public nftInstance; // To interact with nft storage
    
-    // create enum type of auction states
+    // Create enum type of auction states
     enum State { Running, Finallized }
     State public auctionState; // create auction state
 
-    // data of bidder
+    // Data of bidder
     uint256 public highestPrice;
     address payable public highestBidder;
-    mapping(address => uint256) public bids; // bids list
+    mapping(address => uint256) public bids; // Bids list
 
     constructor(
         NFT _nftInstance,
@@ -542,43 +534,39 @@ contract Auction {
         require(_value > startPrice, "You must pay more than the starting price");
         require(_value > highestPrice, "Your bid is too low. Increase it");
 
-        emit PlaceBid(_sender, _value);
-
         // Add new bid for msg.sender
         bids[_sender] = _value;
         // Update the highest price and highest bidder
         highestPrice = _value;
         highestBidder = _sender;
+
+        emit PlaceBid(_sender, _value);
         
         return true;
     }
 
     event AuctionFinalized(address oldOwner, address newOwner, uint256 tokenId);
-    event WhoIsSenderInAuction(address sender, address owner, address auctionAddress);
 
     // Finalize the auction, transfer nft to highest bidder and send eth to owner
-    function finalizeAuction() public {
+    function finalizeAuction() public returns (bool) {
         // Only owner can finalize the auction
-        // require(msg.sender == owner, "You are not owner");
+        require(tx.origin == owner, "You are not owner");
+        require(nftInstance.isApprovedForAll(owner, address(this)), "You are not approved");
 
-        nftInstance.niggaApproving(msg.sender);
-        nftInstance.niggaApproving(owner);
-
-        emit WhoIsSenderInAuction(msg.sender, owner, address(this));
-
-        // highest bidder is not empry
+        // Highest bidder is not empry
         if (highestBidder != address(0)) {
             uint256 price = highestPrice;
 
-            // transfer nft from owner to highest bidder address
+            // Transfer nft from owner to highest bidder address
             nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
 
-            owner.transfer(price); // send eth to owner
+            owner.transfer(price); // Send eth to owner
         }
         
         // No more bids, auction is finalized
         auctionState = State.Finallized; 
 
         emit AuctionFinalized(owner, highestBidder, nftTokenId);
+        return true;
     }
 }
