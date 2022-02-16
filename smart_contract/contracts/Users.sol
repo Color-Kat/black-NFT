@@ -49,6 +49,8 @@ contract User {
     function collectNigga() public {
         require(msg.sender == userAddress, "You are wrong user");
 
+        nftInstance.setApprovalForAll(userAddress, true);
+
         // Create new nft and get tokentID and emit tokenURI
         uint256 tokenId = nftInstance.createNFT(userAddress);
         emit NiggaCollect(nftInstance.tokenURI(tokenId));
@@ -123,9 +125,9 @@ contract User {
 
     // Finalize the auction by id, trandfer eth to owner and transfer nft to highest bidder
     event AuctionFinalazed(bool result);
-    function finalizeAuction(uint256 _auctionId) public returns (bool){
+    function finalizeAuction(uint256 _auctionId) public payable returns (bool){
         require(msg.sender == userAddress, "You are wrong user");
-        bool result = auctionInstance.getAuctionById(_auctionId).finalizeAuction();
+        bool result = (auctionInstance.getAuctionById(_auctionId)).finalizeAuction();
         
         emit AuctionFinalazed(result);
         return result;
@@ -224,10 +226,18 @@ contract NFT is ERC721URIStorage {
         // Transfer tokenId in userAddressToTokenId mapping 
         for (uint256 i = 0; i < userTokenIdsCount; i++) {
             if (userTokenIds[i] == _tokenId) {
-                if (i < userTokenIdsCount) userAddressToTokenId[_from][i] = userAddressToTokenId[_from][i-1];
+
+                for(uint256 j = i; j < userTokenIdsCount-1; j++) {
+                    userAddressToTokenId[_from][i] = userAddressToTokenId[_from][i + 1];
+                }
+
                 userAddressToTokenId[_from].pop();
 
+                // if (i < userTokenIdsCount) userAddressToTokenId[_from][i] = userAddressToTokenId[_from][i-1];
+                // userAddressToTokenId[_from].pop();
                 // delete userAddressToTokenId[_from][i]; // Delete for current user this tokenId // TODO
+
+
                 userAddressToTokenId[_to].push(_tokenId); // Add this tokenId for new owner
                 break;
             }
@@ -558,7 +568,7 @@ contract Auction {
     event WhoIsOwner(address owner, address auction);
 
     // Finalize the auction, transfer nft to highest bidder and send eth to owner
-    function finalizeAuction() public returns (bool) {
+    function finalizeAuction() public payable returns (bool) {
         // Only owner can finalize the auction
         require(tx.origin == owner, "You are not owner");
         // require(nftInstance.isApprovedForAll(owner, address(this)), "You are not approved");
