@@ -504,6 +504,7 @@ contract Auction {
     // Data of bidder
     uint256 public highestPrice;
     address payable public highestBidder;
+    address[] public bidders;
     mapping(address => uint256) public bids; // Bids list
 
     constructor(
@@ -544,16 +545,21 @@ contract Auction {
     // Place bid, update the highest price and highest bidder
     function placeBid(address payable _sender, uint256 _value) public payable notOwner returns(bool) {
         require(auctionState == State.Running, "Auction is already closed");
-        require(_value > startPrice, "You must pay more than the starting price");
-        require(_value > highestPrice, "Your bid is too low. Increase it");
 
-        // Add new bid for msg.sender
-        bids[_sender] = _value;
+        // Count real value if this address already have a bid
+        uint256 realValue = _value;
+        if (bids[_sender] > 0) realValue += bids[_sender];
+
+        require(realValue > startPrice, "You must pay more than the starting price");
+        require(realValue > highestPrice, "Your bid is too low. Increase it");
+
+        bids[_sender] = realValue;  // Add new bid for msg.sender
+        bidders.push(_sender); // Add sender to bidders list
         // Update the highest price and highest bidder
-        highestPrice = _value;
+        highestPrice = realValue;
         highestBidder = _sender;
 
-        emit PlaceBid(_sender, _value);
+        emit PlaceBid(_sender, realValue); // TODODODODO
         
         return true;
     }
@@ -576,6 +582,13 @@ contract Auction {
             nftInstance.niggaTransfer(owner, highestBidder, nftTokenId);
 
             owner.transfer(price); // Send eth to owner
+
+            // Return money to rest bidders
+            for (uint256 i = 0; i < bidders.length; i++){
+                if(highestBidder != bidders[i]) { // don't return money to highest bidder
+                    payable(bidders[i]).transfer(bids[bidders[i]]); // transfer money to rest bidder
+                }
+            }
         }
         
         // No more bids, auction is finalized
