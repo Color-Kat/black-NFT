@@ -123,16 +123,6 @@ contract User {
         return auctionInstance.getContent(_id);
     } 
 
-    // Finalize the auction by id, trandfer eth to owner and transfer nft to highest bidder
-    event AuctionFinalazed(bool result);
-    function finalizeAuction(uint256 _auctionId) public payable returns (bool){
-        require(msg.sender == userAddress, "You are wrong user");
-        bool result = (auctionInstance.getAuctionById(_auctionId)).finalizeAuction();
-        
-        emit AuctionFinalazed(result);
-        return result;
-    }
-
     // place the bid in the auction by id
     event PlaceBid(bool result);
     function placeBid(uint256 _auctionId) public payable {
@@ -142,6 +132,16 @@ contract User {
         bool result = auction.placeBid{value: msg.value}(payable(msg.sender), msg.value); // call auction.placeBid with eth value
 
         emit PlaceBid(result);
+    }
+
+    // Finalize the auction by id, trandfer eth to owner and transfer nft to highest bidder
+    event AuctionFinalazed(bool result);
+    function finalizeAuction(uint256 _auctionId) public returns (bool){
+        require(msg.sender == userAddress, "You are wrong user");
+        bool result = (auctionInstance.getAuctionById(_auctionId)).finalizeAuction();
+        
+        emit AuctionFinalazed(result);
+        return result;
     }
 }
 
@@ -225,18 +225,12 @@ contract NFT is ERC721URIStorage {
 
         // Transfer tokenId in userAddressToTokenId mapping 
         for (uint256 i = 0; i < userTokenIdsCount; i++) {
-            if (userTokenIds[i] == _tokenId) {
-
+            if (userTokenIds[i] == _tokenId) { // Find index of needed index of transfering tokenId
                 for(uint256 j = i; j < userTokenIdsCount-1; j++) {
+                    // From index i move elements back
                     userAddressToTokenId[_from][i] = userAddressToTokenId[_from][i + 1];
                 }
-
-                userAddressToTokenId[_from].pop();
-
-                // if (i < userTokenIdsCount) userAddressToTokenId[_from][i] = userAddressToTokenId[_from][i-1];
-                // userAddressToTokenId[_from].pop();
-                // delete userAddressToTokenId[_from][i]; // Delete for current user this tokenId // TODO
-
+                userAddressToTokenId[_from].pop(); // Remove last element (it's empty)
 
                 userAddressToTokenId[_to].push(_tokenId); // Add this tokenId for new owner
                 break;
@@ -568,7 +562,7 @@ contract Auction {
     event WhoIsOwner(address owner, address auction);
 
     // Finalize the auction, transfer nft to highest bidder and send eth to owner
-    function finalizeAuction() public payable returns (bool) {
+    function finalizeAuction() public returns (bool) {
         // Only owner can finalize the auction
         require(tx.origin == owner, "You are not owner");
         // require(nftInstance.isApprovedForAll(owner, address(this)), "You are not approved");
