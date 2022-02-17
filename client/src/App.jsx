@@ -5,8 +5,9 @@ function App() {
   const {
     error, isLoading, connectWallet, installMetamask,
     currentAccount,
-    currentUser, connectUser, collectNigga,
-    getAuctions, createAuction } = useContext(AuctionContext);
+    currentUserContract, connectUser, user,
+    getAuctions, createAuction
+  } = useContext(AuctionContext);
 
   // console.log(test);
 
@@ -28,12 +29,12 @@ function App() {
 
       {!currentAccount && <button onClick={connectWallet}>Подключить метамаск</button>}
       {currentAccount && <>
-        {!currentUser && <button onClick={connectUser}>Подключиться к nigga-system</button>}
-        {currentUser && <button onClick={collectNigga}>Найти негра</button>}
+        {!currentUserContract && <button onClick={connectUser}>Подключиться к nigga-system</button>}
+        {user && <button onClick={user.collectNigga}>Найти негра</button>}
         {/* <button onClick={createAuction}>Создать аукцион</button> */}
       </>}
 
-      
+
 
       {isLoading && <><hr /> <span>Загрузка...</span></>}
     </div>

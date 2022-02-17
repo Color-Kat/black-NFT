@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import {
-    auctionBox_contract_ABI,
-    auction_contract_ABI,
     contractAddress,
-    NFT_contract_ABI,
     users_contract_ABI,
     user_contract_ABI,
+    NFT_contract_ABI,
+    auctions_contract_ABI,
+    auction_contract_ABI
 } from "../utils/constants";
 import useEth from "../hooks/useEth";
+import User from "../classes/User";
 
 export const AuctionContext = React.createContext<any>(null);
 
 const { ethereum } = window as any;
 
-const getEthereumContract = (abi: string, address: string) => {
+const getEthereumContract = (abi: string, address: string): ethers.Contract => {
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const ethereumContract = new ethers.Contract(address, abi, signer);
@@ -22,24 +23,24 @@ const getEthereumContract = (abi: string, address: string) => {
     return ethereumContract;
 };
 
-const auctionBoxContract = () => {
-    return getEthereumContract(auctionBox_contract_ABI, contractAddress);
-};
-
-const auctionContract = (address: string) => {
-    return getEthereumContract(auction_contract_ABI, address);
-};
-
-const usersContract = () => {
+const usersContract = (): ethers.Contract => {
     return getEthereumContract(users_contract_ABI, contractAddress);
 };
 
-const userContract = (address: string) => {
+const userContract = (address: string): ethers.Contract => {
     return getEthereumContract(user_contract_ABI, address);
 };
 
-const nftContract = (address: string) => {
+const nftContract = (address: string): ethers.Contract => {
     return getEthereumContract(NFT_contract_ABI, address);
+};
+
+const auctionContract = (address: string): ethers.Contract => {
+    return getEthereumContract(auction_contract_ABI, address);
+};
+
+const auctionsContract = (address: string): ethers.Contract => {
+    return getEthereumContract(auctions_contract_ABI, address);
 };
 
 export const AuctionProvider: React.FC = ({ children }: any) => {
@@ -55,7 +56,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     } = useEth(setError, setInstallMetamask);
 
     // user data
-    const [currentUser, setCurrentUser] = useState<ethers.Contract | null>(null);
+    const [currentUserContract, setCurrentUserContract] = useState<ethers.Contract | null>(null);
+    const [user, setUser] = useState<User>();
+
 
     // Auctions data
     const [auctions, setAuctions] = useState([]);
@@ -68,13 +71,17 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         try {
             if (!checkInstallMetamask()) return;
 
+            // TODO save user address
+
             // connect user to nigga system
             await usersContract().connectUser();
             setIsLoading(true); // turn on the loader
 
             // listen events to get connected user
             usersContract().on("UserConnect", (user) => {
-                setCurrentUser(userContract(user));
+                let userContractInstance: ethers.Contract = userContract(user); // Create user contract
+                setCurrentUserContract(userContractInstance);
+                setUser(new User(userContractInstance, setError, setIsLoading));
                 setIsLoading(false); // turn off the loader
             });
 
@@ -84,37 +91,15 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         }
     }
 
-    const collectNigga = async () => {
-        try {
-            if (!checkInstallMetamask()) return false;
-            if (!currentUser) { setError("Вы не подключились к nigga-system!"); return false; }
 
-            await currentUser.collectNigga();
-            setIsLoading(true); // turn on the loader
-
-            let result: string = '';
-
-            currentUser.on("NiggaCollect", (niggaTokenURI) => {
-                console.log(niggaTokenURI);
-                setIsLoading(false); // turn off the loader
-                result = niggaTokenURI;
-            });
-
-            return result;
-        } catch (error) {
-            console.log(error);
-            setError("Не удалось найти ниггера");
-            return false;
-        }
-    }
 
     const createAuction = async (niggaId: number, message: string, startPrice: number) => {
         try {
             if (!checkInstallMetamask()) return false;
-            if (!currentUser) { setError("Вы не подключились к nigga-system!"); return false; }
+            if (!currentUserContract) { setError("Вы не подключились к nigga-system!"); return false; }
 
             // request to create new auction (sellNigga)
-            const transactionHash = await currentUser.sellNigga(niggaId, message, startPrice);
+            const transactionHash = await currentUserContract.sellNigga(niggaId, message, startPrice);
 
             setIsLoading(true);
             await transactionHash.wait(); // wait the transaction ends
@@ -122,7 +107,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
             // get auctionId of created auction
             let auctionId: number = 0;
-            currentUser.on("AuctionCreated", (auction_id: number) => {
+            currentUserContract.on("AuctionCreated", (auction_id: number) => {
                 auctionId = auction_id;
             });
 
@@ -159,41 +144,41 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     };
 
     // const createAuction = async () => {
-        //     try {
-        //         if (!checkInstallMetamask) return;
+    //     try {
+    //         if (!checkInstallMetamask) return;
 
-        //         const data = {}; // transfer data
-        //         const addressTo = "0xDef2E169f0d3116c0C09717CE7B12DA98e39ABA9"; // to my wallet
-        //         const gas = "0x5208"; // 21000 GWEI
-        //         const commission_amount = ethers.utils.parseEther("0.0005")._hex;
+    //         const data = {}; // transfer data
+    //         const addressTo = "0xDef2E169f0d3116c0C09717CE7B12DA98e39ABA9"; // to my wallet
+    //         const gas = "0x5208"; // 21000 GWEI
+    //         const commission_amount = ethers.utils.parseEther("0.0005")._hex;
 
-        //         await ethereum.request({
-        //             method: 'eth_sendTransaction',
-        //             params: [{
-        //                 from: currentAccount,
-        //                 to: addressTo,
-        //                 gas: gas,
-        //                 value: commission_amount
-        //             }]
-        //         });
-        //         const transactionHash = await auctionBoxContract().createAuction(
-        //             'Белые нигги в чёрных квадратах',
-        //             'Искусство',
-        //             `<svg xmlns="http://www.w3.org/2000/svg" width="580" height="400"></svg>`,
-        //             ethers.utils.parseEther("0.1"),
-        //             3600000
-        //         );
+    //         await ethereum.request({
+    //             method: 'eth_sendTransaction',
+    //             params: [{
+    //                 from: currentAccount,
+    //                 to: addressTo,
+    //                 gas: gas,
+    //                 value: commission_amount
+    //             }]
+    //         });
+    //         const transactionHash = await auctionBoxContract().createAuction(
+    //             'Белые нигги в чёрных квадратах',
+    //             'Искусство',
+    //             `<svg xmlns="http://www.w3.org/2000/svg" width="580" height="400"></svg>`,
+    //             ethers.utils.parseEther("0.1"),
+    //             3600000
+    //         );
 
-        //         setIsLoading(true);
-        //         await transactionHash.wait();
-        //         setIsLoading(false);
+    //         setIsLoading(true);
+    //         await transactionHash.wait();
+    //         setIsLoading(false);
 
-        //         getAuctions();
-        //     } catch (error) {
-        //         console.log(error);
+    //         getAuctions();
+    //     } catch (error) {
+    //         console.log(error);
 
-        //         setError("Не удалось создать транзакцию");
-        //     }
+    //         setError("Не удалось создать транзакцию");
+    //     }
     // };
 
     // if (auctionBox.methods)
@@ -208,9 +193,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 connectWallet, // function to connect metamask
                 currentAccount, // get current connected account
 
-                currentUser,
+                currentUserContract,
                 connectUser,
-                collectNigga,
+                user,
 
                 getAuctions,
                 createAuction
