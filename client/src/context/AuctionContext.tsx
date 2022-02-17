@@ -71,20 +71,29 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         try {
             if (!checkInstallMetamask()) return;
 
-            // TODO save user address
+            // Try to get user addres from localStorage
+            let userContractAddress = localStorage.getItem('user_contract_address') || '';
 
-            // connect user to nigga system
-            await usersContract().connectUser();
-            setIsLoading(true); // turn on the loader
-
-            // listen events to get connected user
-            usersContract().on("UserConnect", (user) => {
-                let userContractInstance: ethers.Contract = userContract(user); // Create user contract
+            const initUser = (userAddress: string) => {
+                let userContractInstance: ethers.Contract = userContract(userAddress); // Create user contract
                 setCurrentUserContract(userContractInstance);
                 setUser(new User(userContractInstance, setError, setIsLoading));
-                setIsLoading(false); // turn off the loader
-            });
+            }
 
+            setIsLoading(true); // Turn on the loader
+
+            if (!userContractAddress) { // User is not connected to nigga system yet
+                // Connect user to nigga system
+                await usersContract().connectUser();
+
+                // Listen events to get connected user
+                usersContract().on("UserConnect", (user) => {
+                    localStorage.setItem('user_contract_address', user); // Save user contract address to use in future after reload
+                    initUser(user);
+                });
+            } else initUser(userContractAddress);
+
+            setIsLoading(false); // turn off the loader
         } catch (error) {
             console.log(error);
             setError("Не удалось подключить пользователя к nigga-system");
