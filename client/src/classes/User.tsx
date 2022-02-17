@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 const { ethereum } = window as any;
 
 export default class User {
@@ -13,12 +13,14 @@ export default class User {
         this.address = userContract.address;
     }
 
+    /**
+     * Call collectNigga in User contact and return nft tokenURI
+     * @returns 
+     */
     public collectNigga = async () => {
-        console.log(this);
-
         try {
-            await this.userContract.collectNigga();
             this.setIsLoading(true); // Turn on the loader
+            await this.userContract.collectNigga();
 
             let result: string = '';
             this.userContract.on("NiggaCollect", (niggaTokenURI: string) => {
@@ -31,6 +33,21 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось найти ниггера");
+            return false;
+        }
+    }
+
+    public getMyNiggasTokenIds = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let myNiggasIDs = (await this.userContract.getMyNiggaTokenIds()).map((id: BigNumber) => id.toNumber());
+
+            this.setIsLoading(false); // Turn off the loader
+
+            return myNiggasIDs;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших негров");
             return false;
         }
     }

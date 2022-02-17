@@ -74,7 +74,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
             // Try to get user addres from localStorage
             let userContractAddress = localStorage.getItem('user_contract_address') || '';
 
-            const initUser = (userAddress: string) => {
+            const initUser = async (userAddress: string) => {
                 let userContractInstance: ethers.Contract = userContract(userAddress); // Create user contract
                 setCurrentUserContract(userContractInstance);
                 setUser(new User(userContractInstance, setError, setIsLoading));
@@ -130,12 +130,16 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
     useEffect(() => {
         // connectUser();
-    }, []);
+        getAuctions()
+
+    }, [user]);
 
     /**
      * get auctions list from blockchain
      */
     const getAuctions = async () => {
+        if (user) console.log(await user.getMyNiggasTokenIds());
+
         //     if (!checkInstallMetamask()) return;
         //     // console.log(await auctionBoxContract().auctions(1));
 
