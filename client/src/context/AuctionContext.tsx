@@ -100,8 +100,6 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         }
     }
 
-
-
     const createAuction = async (niggaId: number, message: string, startPrice: number) => {
         try {
             if (!checkInstallMetamask()) return false;

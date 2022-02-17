@@ -5,7 +5,7 @@ const { ethereum } = window as any;
 export default class User {
     public address: string = '';
 
-    constructor(
+    public constructor(
         public userContract: ethers.Contract,
         private setError: Function,
         private setIsLoading: Function
@@ -13,15 +13,17 @@ export default class User {
         this.address = userContract.address;
     }
 
-    async collectNigga() {
+    public collectNigga = async () => {
+        console.log(this);
+
         try {
             await this.userContract.collectNigga();
-            this.setIsLoading(true); // turn on the loader
+            this.setIsLoading(true); // Turn on the loader
 
             let result: string = '';
             this.userContract.on("NiggaCollect", (niggaTokenURI: string) => {
                 console.log(niggaTokenURI);
-                this.setIsLoading(false); // turn off the loader
+                this.setIsLoading(false); // Turn off the loader
                 result = niggaTokenURI;
             });
 
