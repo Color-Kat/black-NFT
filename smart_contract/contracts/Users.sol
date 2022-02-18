@@ -80,8 +80,6 @@ contract User {
         return nftInstance.getTokenIdsFromAddress(userAddress);
     }
 
-    // event GetTokenIds(uint256[] tokenIds, uint256 count);
-
     // Return list of nigga-tokenURIs
     function getMyNiggasTokenURI() public view returns (string[] memory) {
         uint256[] memory tokenIds = getMyNiggaTokenIds();
@@ -145,6 +143,12 @@ contract User {
     {
         require(msg.sender == userAddress, "You are wrong user");
         return auctionInstance.getContent(_id);
+    }
+
+    // Return user's list of auction contracts adresses
+    function getMyAuctionsContracts() public view returns (address[]) {
+        require(msg.sender == userAddress, "You are wrong user");
+        return address(auctionInstance.getAuctions());
     }
 
     // place the bid in the auction by id
@@ -223,8 +227,8 @@ contract NFT is ERC721URIStorage {
         emit RequestRandomSVG(randomNumber);
 
         // Generate nigga svg
-        // string memory svg = generateSVG(randomNumber);
-        string memory svg = "<svg></svg>";
+        string memory svg = generateSVG(randomNumber);
+        // string memory svg = "<svg></svg>";
         string memory imageURI = svgToImageURI(svg);
         string memory tokenURI = formatTokenURI(
             imageURI,

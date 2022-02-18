@@ -126,7 +126,37 @@ export default class User {
         }
     }
 
-    public getMyAuctions = async () => {
-       
+    public getMyAuctionsIds = async (): Promise<number[] | false> => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let auctionsIdsList = await this.userContract.getMyAuctionIds();
+            this.setIsLoading(false); // Turn off the loader
+
+            return auctionsIdsList.map((auctionId: BigNumber) => { auctionId.toNumber() });
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших аукционов");
+            return false;
+        }
+    }
+
+    public getMyAuctionsContent = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let auctionsIdsList: number[]|false = await this.getMyAuctionsIds();
+            
+            if (auctionsIdsList) {
+                // return auctionsIdsList.map((auctionId: number) => {
+                    
+                // })
+            }
+
+
+            this.setIsLoading(false); // Turn off the loader
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших аукционов");
+            return false;
+        }
     }
 }
