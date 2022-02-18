@@ -1,47 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import {
-    contractAddress,
-    users_contract_ABI,
-    user_contract_ABI,
-    NFT_contract_ABI,
-    auctions_contract_ABI,
-    auction_contract_ABI
-} from "../utils/constants";
 import useEth from "../hooks/useEth";
 import User from "../classes/User";
+import { userContract, usersContract } from "../utils/smartContracts";
 
 export const AuctionContext = React.createContext<any>(null);
-
-const { ethereum } = window as any;
-
-const getEthereumContract = (abi: string, address: string): ethers.Contract => {
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
-    const ethereumContract = new ethers.Contract(address, abi, signer);
-
-    return ethereumContract;
-};
-
-const usersContract = (): ethers.Contract => {
-    return getEthereumContract(users_contract_ABI, contractAddress);
-};
-
-const userContract = (address: string): ethers.Contract => {
-    return getEthereumContract(user_contract_ABI, address);
-};
-
-const nftContract = (address: string): ethers.Contract => {
-    return getEthereumContract(NFT_contract_ABI, address);
-};
-
-const auctionContract = (address: string): ethers.Contract => {
-    return getEthereumContract(auction_contract_ABI, address);
-};
-
-const auctionsContract = (address: string): ethers.Contract => {
-    return getEthereumContract(auctions_contract_ABI, address);
-};
 
 export const AuctionProvider: React.FC = ({ children }: any) => {
     const [installMetamask, setInstallMetamask] = useState<boolean>(false);
@@ -138,7 +101,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
      * get auctions list from blockchain
      */
     const getAuctions = async () => {
-        if (user) console.log(await user.getNiggaURIById(2));
+        if (user) console.log(await user.getMyAuctionsContent());
 
         //     if (!checkInstallMetamask()) return;
         //     // console.log(await auctionBoxContract().auctions(1));

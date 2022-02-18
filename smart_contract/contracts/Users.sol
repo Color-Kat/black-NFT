@@ -153,7 +153,6 @@ contract User {
 
     // place the bid in the auction by id
     event PlaceBid(bool result);
-
     function placeBid(uint256 _auctionId) public payable {
         require(msg.sender == userAddress, "You are wrong user");
 

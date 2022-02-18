@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
+import { auctionContract } from "../utils/smartContracts";
 const { ethereum } = window as any;
 
 export default class User {
@@ -132,7 +133,7 @@ export default class User {
             let auctionsIdsList = await this.userContract.getMyAuctionIds();
             this.setIsLoading(false); // Turn off the loader
 
-            return auctionsIdsList.map((auctionId: BigNumber) => { auctionId.toNumber() });
+            return auctionsIdsList.map((auctionId: BigNumber) => auctionId.toNumber());
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших аукционов");
@@ -143,14 +144,14 @@ export default class User {
     public getMyAuctionsContent = async () => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            let auctionsIdsList: number[]|false = await this.getMyAuctionsIds();
-            
-            if (auctionsIdsList) {
-                // return auctionsIdsList.map((auctionId: number) => {
-                    
-                // })
-            }
+            let auctionsIdsList: number[] | false = await this.getMyAuctionsIds();
 
+            if (auctionsIdsList) {
+                // For every id get auction content
+                return await Promise.all(auctionsIdsList.map(async (auctionId: number) => {
+                    return await this.userContract.getAuctionContentById(auctionId);
+                }));
+            }
 
             this.setIsLoading(false); // Turn off the loader
         } catch (error) {
