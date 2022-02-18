@@ -34,6 +34,7 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
             if (accounts[0]) {
                 setCurrentAccount(accounts[0]);
                 setInstallMetamaskCallback(false);
+                setErrorCallback("");
             }
         } catch (error) {
             setInstallMetamaskCallback(true);

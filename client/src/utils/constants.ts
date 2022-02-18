@@ -10,4 +10,4 @@ export const NFT_contract_ABI: any = abiNFT.abi;
 export const auctions_contract_ABI: any = abiAuctions.abi;
 export const auction_contract_ABI: any = abiAuction.abi;
 
-export const contractAddress: string = '0xaF94d606432C65BaBeA9f08C61C6E7ceE819Eb00';
+export const contractAddress: string = '0x48f3d417DD77af6F3fE75eB652644a3cC8c7E995';

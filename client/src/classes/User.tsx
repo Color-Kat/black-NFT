@@ -37,7 +37,7 @@ export default class User {
         }
     }
 
-    public getMyNiggasTokenIds = async () => {
+    public getMyNiggasTokenIds = async (): Promise<number[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
             let myNiggasIDs = (await this.userContract.getMyNiggaTokenIds()).map((id: BigNumber) => id.toNumber());
@@ -52,18 +52,81 @@ export default class User {
         }
     }
 
-    public getMyNiggasTokenURIs = async () => {
+    // public getMyNiggasTokenURIs = async () => {
+    //     try {
+    //         this.setIsLoading(true); // Turn on the loader
+    //         console.log(
+    //             this.userContract
+    //         );
+
+    //         let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
+
+    //         this.setIsLoading(false); // Turn off the loader
+
+    //         return myNiggasTokenURIs;
+    //     } catch (error) {
+    //         console.log(error);
+    //         this.setError("Не удалось загрузить список ваших негров");
+    //         return false;
+    //     }
+    // }
+
+    /**
+     * Return tokenURI of niggaNFT by niggaId
+     * 
+     * @param niggaId - id of nigger, not tokenId
+     * @returns 
+     */
+    public getNiggaURIById = async (niggaId: number): Promise<number[] | false> => {
         try {
-            this.setIsLoading(true); // Turn on the loader
-            let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
+            // Check if user has this nigger
+            const niggasIds = await this.getMyNiggasTokenIds();
+            if (niggasIds && niggasIds.includes(niggaId)) {
+                this.setIsLoading(true); // Turn on the loader
+                let niggaTokenURI = await this.userContract.getNiggaById(niggaId);
+                this.setIsLoading(false); // Turn off the loader
 
-            this.setIsLoading(false); // Turn off the loader
+                return niggaTokenURI;
+            }
 
-            return myNiggasTokenURIs;
+            this.setError("Вам не принадлежит ниггер№" + niggaId);
+            return false;
         } catch (error) {
             console.log(error);
-            this.setError("Не удалось загрузить список ваших негров");
+            this.setError("Не удалось найти негра №" + niggaId);
             return false;
         }
+    }
+
+    public createAuction = async (niggaId: number, message: string, startPrice: number): Promise<boolean> => {
+        try {
+            // Check if user has this nigga
+            const niggasIds = await this.getMyNiggasTokenIds();
+            if (niggasIds && niggasIds.includes(niggaId)) {
+                this.setIsLoading(true); // Turn on the loader
+                await this.userContract.sellNigga(niggaId, message, startPrice);
+
+                // When auction is created, load auctions list
+                this.userContract.on("AuctionCreated", (auctionId: BigNumber) => {
+                    // console.log(auctionId.toNumber());
+                    this.setIsLoading(false); // Turn off the loader
+                    this.getMyAuctions();
+                });
+
+                return true;
+            }
+
+            this.setError("Вам не принадлежит ниггер№" + niggaId);
+            return false;
+
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось создать новый аукцион");
+            return false;
+        }
+    }
+
+    public getMyAuctions = async () => {
+       
     }
 }
