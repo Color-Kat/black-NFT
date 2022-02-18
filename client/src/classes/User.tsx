@@ -51,4 +51,19 @@ export default class User {
             return false;
         }
     }
+
+    public getMyNiggasTokenURIs = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
+
+            this.setIsLoading(false); // Turn off the loader
+
+            return myNiggasTokenURIs;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших негров");
+            return false;
+        }
+    }
 }

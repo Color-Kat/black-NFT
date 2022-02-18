@@ -138,7 +138,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
      * get auctions list from blockchain
      */
     const getAuctions = async () => {
-        if (user) console.log(await user.getMyNiggasTokenIds());
+        if (user) console.log(await user.getMyNiggasTokenURIs());
 
         //     if (!checkInstallMetamask()) return;
         //     // console.log(await auctionBoxContract().auctions(1));

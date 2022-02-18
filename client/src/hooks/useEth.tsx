@@ -50,7 +50,10 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
 
             const accounts = await ethereum.request({ method: "eth_accounts" });
 
-            if (accounts[0]) setCurrentAccount(accounts[0]);
+            if (accounts[0]) {
+                setCurrentAccount(accounts[0]);
+                setErrorCallback("");
+            }
             else setErrorCallback("Подключите, пожалуйста, кошелёк metamask");
         } catch (error) {
             console.log("Some error happened", error);
