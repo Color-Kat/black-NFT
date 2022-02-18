@@ -139,7 +139,7 @@ export default class User {
             this.setError("Не удалось загрузить список ваших аукционов");
             return false;
         }
-    }
+    } //check
 
     public getMyAuctionsContent = async () => {
         try {
