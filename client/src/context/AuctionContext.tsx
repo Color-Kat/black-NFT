@@ -95,7 +95,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         // connectUser();
         getAuctions();
 
-        // console.log(nftContract(nftAddress).isApprovedForAll("0x33e5D5a8D9BdCe3Cd25DfBf0804Ef970Ed4913C6", ));
+        if (user) console.log(user.placeBid(0, 0.0005));
 
     }, [user]);
 

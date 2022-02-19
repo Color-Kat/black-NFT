@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
 import { auctionContract, nftContract } from "../utils/smartContracts";
+import { toWei } from "../utils/ethFunctions";
 const { ethereum } = window as any;
 
 interface AuctionContentI {
@@ -29,19 +30,20 @@ export default class User {
     public collectNigga = async (): Promise<string> => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            await this.userContract.collectNigga();
+            await this.userContract.collectNigga(); // Call method in smart contract
 
-            let result: string = '';
-            this.userContract.on("NiggaCollect", (niggaTokenURI: string) => {
-                console.log(niggaTokenURI);
-                this.setIsLoading(false); // Turn off the loader
-                result = niggaTokenURI;
+            // And wait for the NiggaCollect event to fire
+            return await new Promise<string>((resolve, reject) => {
+                this.userContract.on("NiggaCollect", (niggaTokenURI: string) => {
+                    console.log(niggaTokenURI);
+                    this.setIsLoading(false); // Turn off the loader
+                    resolve(niggaTokenURI);
+                });
             });
-
-            return result;
         } catch (error) {
             console.log(error);
             this.setError("Не удалось найти ниггера");
+            this.setIsLoading(false); // Turn off the loader 
             return "";
         }
     }
@@ -57,6 +59,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших негров");
+            this.setIsLoading(false); // Turn off the loader
             return [];
         }
     }
@@ -103,6 +106,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось найти негра №" + niggaId);
+            this.setIsLoading(false); // Turn off the loader
             return [];
         }
     }
@@ -137,6 +141,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось создать новый аукцион");
+            this.setIsLoading(false); // Turn off the loader
             return false;
         }
     }
@@ -151,6 +156,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших аукционов");
+            this.setIsLoading(false); // Turn off the loader
             return [];
         }
     }
@@ -176,11 +182,45 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших аукционов");
+            this.setIsLoading(false); // Turn off the loader
             return [];
         }
     }
 
-    public placeBid = async (auctionId: number, value: number) => {
-        const auctionContent = await this.userContract.getAuctionContentById(auctionId);
+    public placeBid = async (auctionId: number, valueEth: number) => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+
+            // Convert eth value to wei
+            const valueWei = toWei(valueEth);
+
+            // Check if value is higher than highest bid
+            const auctionContent = await this.userContract.getAuctionContentById(auctionId);
+            if (valueWei > auctionContent.highestPrice) {
+                const overrides = {
+                    value: valueWei,
+                    gasLimit: 30000
+                }
+                // Call placeBid method with override (send some ETH)
+                await this.userContract.placeBid(auctionId, overrides);
+
+                // And wait for PlaceBid event
+                return await new Promise<boolean>((resolve, reject) => {
+                    this.userContract.on("PlaceBid", async (result: boolean) => {
+                        console.log(result);
+                        return result;
+                    })
+                });
+            }
+
+            this.setError("Ваша ставка должна быть больше " + auctionContent.highestPrice);
+            this.setIsLoading(false); // Turn off the loader
+            return false;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось сделать ставку на этого негра");
+            this.setIsLoading(false); // Turn off the loader
+            return false;
+        }
     }
 }

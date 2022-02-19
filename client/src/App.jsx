@@ -41,7 +41,9 @@ function App() {
                         <button onClick={connectUser}>Подключиться к nigga-system</button>
                     )}
                     {user && <>
-                        <button onClick={user.collectNigga}>Найти негра</button>
+                        <button onClick={async () => {
+                            console.log(await user.collectNigga());
+                        }}>Найти негра</button>
                         <button onClick={() => user.createAuction(1, 'message', 10000)}>Создать аукцион</button>
                     </>}
                     {/* <button onClick={createAuction}>Создать аукцион</button> */}
