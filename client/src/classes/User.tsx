@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
-import { auctionContract } from "../utils/smartContracts";
+import { auctionContract, nftContract } from "../utils/smartContracts";
 const { ethereum } = window as any;
 
 export default class User {
@@ -108,10 +108,16 @@ export default class User {
                 await this.userContract.sellNigga(niggaId, message, startPrice);
 
                 // When auction is created, load auctions list
-                this.userContract.on("AuctionCreated", (auctionId: BigNumber) => {
-                    // console.log(auctionId.toNumber());
+                this.userContract.on("AuctionCreated", async (auctionId: BigNumber) => {
+                    // To approve trasfer NFT we need to approve auction, so
+                    // Get approving data
+                    const [nftAddress, auctionAddress] = await this.userContract.getAuctionApprovingData(auctionId);
+                    // in NFT contract approve transfering nft for auction contract
+                    nftContract(nftAddress).setApprovalForAll(auctionAddress, true);
+
+                    // this.getMyAuctionsContent();
+
                     this.setIsLoading(false); // Turn off the loader
-                    this.getMyAuctions();
                 });
 
                 return true;
@@ -139,8 +145,12 @@ export default class User {
             this.setError("Не удалось загрузить список ваших аукционов");
             return false;
         }
-    } //check
+    }
 
+    /**
+     * Return list of user's auctions content
+     * @returns 
+     */
     public getMyAuctionsContent = async () => {
         try {
             this.setIsLoading(true); // Turn on the loader

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useEth from "../hooks/useEth";
 import User from "../classes/User";
-import { userContract, usersContract } from "../utils/smartContracts";
+import { nftContract, userContract, usersContract } from "../utils/smartContracts";
 
 export const AuctionContext = React.createContext<any>(null);
 
@@ -93,7 +93,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
     useEffect(() => {
         // connectUser();
-        getAuctions()
+        getAuctions();
+
+        // console.log(nftContract(nftAddress).isApprovedForAll("0x33e5D5a8D9BdCe3Cd25DfBf0804Ef970Ed4913C6", ));
 
     }, [user]);
 

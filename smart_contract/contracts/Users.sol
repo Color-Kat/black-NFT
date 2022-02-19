@@ -103,7 +103,7 @@ contract User {
         uint256 _startPrice
     ) public {
         require(msg.sender == userAddress, "You are wrong user");
-
+        // TODO can't to sell nigga twice
         uint256 tokenId = getNiggaTokenIdById(_niggaId); // Get tokenId of auction lot
 
         uint256 auctionId = auctionInstance.createAuction(
