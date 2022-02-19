@@ -3,6 +3,14 @@ import { BigNumber, ethers } from "ethers";
 import { auctionContract, nftContract } from "../utils/smartContracts";
 const { ethereum } = window as any;
 
+interface AuctionContentI {
+    owner: string;
+    nftTokenId: number;
+    message: string;
+    startPrice: number;
+    highestPrice: number;
+}
+
 export default class User {
     public address: string = '';
 
@@ -18,7 +26,7 @@ export default class User {
      * Call collectNigga in User contact and return nft tokenURI
      * @returns 
      */
-    public collectNigga = async () => {
+    public collectNigga = async (): Promise<string> => {
         try {
             this.setIsLoading(true); // Turn on the loader
             await this.userContract.collectNigga();
@@ -34,7 +42,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось найти ниггера");
-            return false;
+            return "";
         }
     }
 
@@ -49,7 +57,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших негров");
-            return false;
+            return [];
         }
     }
 
@@ -91,11 +99,11 @@ export default class User {
             }
 
             this.setError("Вам не принадлежит ниггер№" + niggaId);
-            return false;
+            return [];
         } catch (error) {
             console.log(error);
             this.setError("Не удалось найти негра №" + niggaId);
-            return false;
+            return [];
         }
     }
 
@@ -133,7 +141,7 @@ export default class User {
         }
     }
 
-    public getMyAuctionsIds = async (): Promise<number[] | false> => {
+    public getMyAuctionsIds = async (): Promise<number[]> => {
         try {
             this.setIsLoading(true); // Turn on the loader
             let auctionsIdsList = await this.userContract.getMyAuctionIds();
@@ -143,7 +151,7 @@ export default class User {
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших аукционов");
-            return false;
+            return [];
         }
     }
 
@@ -151,7 +159,7 @@ export default class User {
      * Return list of user's auctions content
      * @returns 
      */
-    public getMyAuctionsContent = async () => {
+    public getMyAuctionsContent = async (): Promise<AuctionContentI[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
             let auctionsIdsList: number[] | false = await this.getMyAuctionsIds();
@@ -159,15 +167,20 @@ export default class User {
             if (auctionsIdsList) {
                 // For every id get auction content
                 return await Promise.all(auctionsIdsList.map(async (auctionId: number) => {
-                    return await this.userContract.getAuctionContentById(auctionId);
+                    return await this.userContract.getAuctionContentById(auctionId) as AuctionContentI;
                 }));
             }
 
             this.setIsLoading(false); // Turn off the loader
+            return [];
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших аукционов");
-            return false;
+            return [];
         }
+    }
+
+    public placeBid = async (auctionId: number, value: number) => {
+        const auctionContent = await this.userContract.getAuctionContentById(auctionId);
     }
 }
