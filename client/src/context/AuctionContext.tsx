@@ -95,6 +95,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         // connectUser();
         getAuctions();
 
+        // if (user) console.log(user.get(0, 0.0005));
         if (user) console.log(user.placeBid(0, 0.0005));
 
     }, [user]);

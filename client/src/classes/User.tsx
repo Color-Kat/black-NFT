@@ -193,13 +193,14 @@ export default class User {
 
             // Convert eth value to wei
             const valueWei = toWei(valueEth);
+            console.log(valueWei);
+
 
             // Check if value is higher than highest bid
             const auctionContent = await this.userContract.getAuctionContentById(auctionId);
-            if (valueWei > auctionContent.highestPrice) {
+            if (valueWei.toNumber() > auctionContent.highestPrice.toNumber()) {
                 const overrides = {
-                    value: valueWei,
-                    gasLimit: 30000
+                    value: valueWei
                 }
                 // Call placeBid method with override (send some ETH)
                 await this.userContract.placeBid(auctionId, overrides);
@@ -208,7 +209,7 @@ export default class User {
                 return await new Promise<boolean>((resolve, reject) => {
                     this.userContract.on("PlaceBid", async (result: boolean) => {
                         console.log(result);
-                        return result;
+                        resolve(result);
                     })
                 });
             }
