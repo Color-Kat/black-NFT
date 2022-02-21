@@ -92,19 +92,30 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
 
     useEffect(() => {
-        // connectUser();
+        // connectUser();s
         getAuctions();
 
         // if (user) console.log(user.get(0, 0.0005));
-        if (user) console.log(user.placeBid(0, 0.0005));
+        if (user) console.log(user.placeBid(9, 0.005));
 
     }, [user]);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setError("");
+        }, 7000);
+    }, [error]);
 
     /**
      * get auctions list from blockchain
      */
     const getAuctions = async () => {
-        if (user) console.log(await user.getMyAuctionsContent());
+        if (user) {
+            console.log(await user.getMyNiggasTokenIds());
+            // console.log(await user.createAuction(3, 'some message for text', 0.0011));
+
+            console.log(await user.getMyAuctionsContent());
+        }
 
         //     if (!checkInstallMetamask()) return;
         //     // console.log(await auctionBoxContract().auctions(1));

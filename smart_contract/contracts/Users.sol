@@ -525,7 +525,7 @@ contract Auction {
         message = _message;
         startPrice = _startPrice;
         startTime = block.timestamp;
-        highestPrice = startPrice;
+        highestPrice = 0;
 
         nftInstance = _nftInstance;
     }

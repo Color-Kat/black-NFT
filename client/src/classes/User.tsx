@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
 import { auctionContract, nftContract } from "../utils/smartContracts";
-import { toWei } from "../utils/ethFunctions";
+import { toEth, toWei } from "../utils/ethFunctions";
 const { ethereum } = window as any;
 
 interface AuctionContentI {
     owner: string;
-    nftTokenId: number;
+    nftTokenId: BigNumber;
     message: string;
-    startPrice: number;
-    highestPrice: number;
+    startPrice: BigNumber;
+    highestPrice: BigNumber;
 }
 
 export default class User {
@@ -117,7 +117,8 @@ export default class User {
             const niggasIds = await this.getMyNiggasTokenIds();
             if (niggasIds && niggasIds.includes(niggaId)) {
                 this.setIsLoading(true); // Turn on the loader
-                await this.userContract.sellNigga(niggaId, message, startPrice);
+
+                await this.userContract.sellNigga(niggaId, message, toWei(startPrice));
 
                 // When auction is created, load auctions list
                 this.userContract.on("AuctionCreated", async (auctionId: BigNumber) => {
@@ -192,15 +193,24 @@ export default class User {
             this.setIsLoading(true); // Turn on the loader
 
             // Convert eth value to wei
-            const valueWei = toWei(valueEth);
-            console.log(valueWei);
-
+            // const valueWei = toWei(valueEth);
 
             // Check if value is higher than highest bid
-            const auctionContent = await this.userContract.getAuctionContentById(auctionId);
-            if (valueWei.toNumber() > auctionContent.highestPrice.toNumber()) {
+            const auctionContent: AuctionContentI = await this.userContract.getAuctionContentById(auctionId);
+            // console.log(valueWei.toNumber(), auctionContent.highestPrice.toNumber());
+
+            console.log(auctionContent.highestPrice, auctionContent.startPrice);
+
+
+            const highestPrice = ethers.utils.formatEther(auctionContent.highestPrice);
+            const startPrice = ethers.utils.formatEther(auctionContent.startPrice);
+
+            const maxPrice = highestPrice > startPrice ? highestPrice : startPrice;
+            console.log(maxPrice, highestPrice, startPrice);
+
+            if (+valueEth > +maxPrice) {
                 const overrides = {
-                    value: valueWei
+                    value: toWei(valueEth)
                 }
                 // Call placeBid method with override (send some ETH)
                 await this.userContract.placeBid(auctionId, overrides);
@@ -214,7 +224,7 @@ export default class User {
                 });
             }
 
-            this.setError("Ваша ставка должна быть больше " + auctionContent.highestPrice);
+            this.setError("Ваша ставка должна быть больше " + toEth(+maxPrice) + "ETH");
             this.setIsLoading(false); // Turn off the loader
             return false;
         } catch (error) {
