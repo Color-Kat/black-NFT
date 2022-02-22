@@ -33,7 +33,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     const connectUser = async () => {
         try {
             if (!checkInstallMetamask()) return;
-
+            // localStorage.setItem('user_contract_address', '');
             // Try to get user addres from localStorage
             let userContractAddress = localStorage.getItem('user_contract_address') || '';
 
@@ -63,40 +63,12 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         }
     }
 
-    const createAuction = async (niggaId: number, message: string, startPrice: number) => {
-        try {
-            if (!checkInstallMetamask()) return false;
-            if (!currentUserContract) { setError("Вы не подключились к nigga-system!"); return false; }
-
-            // request to create new auction (sellNigga)
-            const transactionHash = await currentUserContract.sellNigga(niggaId, message, startPrice);
-
-            setIsLoading(true);
-            await transactionHash.wait(); // wait the transaction ends
-            setIsLoading(true);
-
-            // get auctionId of created auction
-            let auctionId: number = 0;
-            currentUserContract.on("AuctionCreated", (auction_id: number) => {
-                auctionId = auction_id;
-            });
-
-            return auctionId;
-        } catch (error) {
-            console.log(error);
-            setError("Не удалось создать аукцион");
-            return false;
-        }
-    }
-
-
-
     useEffect(() => {
         // connectUser();s
         getAuctions();
 
         // if (user) console.log(user.get(0, 0.0005));
-        if (user) console.log(user.placeBid(9, 0.005));
+        if (user) console.log(user.placeBid(0, 0.0061));
 
     }, [user]);
 
@@ -112,9 +84,9 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     const getAuctions = async () => {
         if (user) {
             console.log(await user.getMyNiggasTokenIds());
-            // console.log(await user.createAuction(3, 'some message for text', 0.0011));
-
             console.log(await user.getMyAuctionsContent());
+            // console.log(await user.createAuction(0, 'some message for text', 0.0061));
+
         }
 
         //     if (!checkInstallMetamask()) return;
@@ -185,8 +157,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 connectUser,
                 user,
 
-                getAuctions,
-                createAuction
+                getAuctions
             }}
         >
             {children}

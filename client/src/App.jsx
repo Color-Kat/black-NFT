@@ -44,7 +44,7 @@ function App() {
                         <button onClick={async () => {
                             console.log(await user.collectNigga());
                         }}>Найти негра</button>
-                        <button onClick={() => user.createAuction(1, 'message', 0.0005)}>Создать аукцион</button>
+                        <button onClick={() => user.createAuction(0, 'message', 0.0005)}>Создать аукцион</button>
                     </>}
                     {/* <button onClick={createAuction}>Создать аукцион</button> */}
                 </>
