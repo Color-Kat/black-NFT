@@ -133,6 +133,9 @@ contract User {
         require(msg.sender == userAddress, "You are wrong user");
 
         Auction auction = auctionInstance.getAuctionById(_auctionId);
+
+        require(msg.sender != auction.owner(), "You are owner of auction");
+        
         bool result = auction.placeBid{value: msg.value}(payable(msg.sender), msg.value); // Call auction.placeBid with eth value
 
         emit PlaceBid(result);
@@ -430,6 +433,8 @@ struct AuctionContent {
     string message;
     uint256 startPrice;
     uint256 highestPrice;
+    address highestBidder;
+    Auction.State auctionState;
 }
 
 contract Auctions {
@@ -538,7 +543,9 @@ contract Auction {
                 nftTokenId,
                 message,
                 startPrice,
-                highestPrice
+                highestPrice,
+                highestBidder,
+                auctionState
             );
     }
 

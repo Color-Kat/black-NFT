@@ -233,4 +233,25 @@ export default class User {
             return false;
         }
     }
+
+    public finalizeAuction = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            await this.userContract.finalizeAuction(); // Call method in smart contract
+
+            // And wait for the AuctionFinalazed event to fire
+            return await new Promise<boolean>((resolve, reject) => {
+                this.userContract.on("AuctionFinalazed", (result: boolean) => {
+                    console.log(result);
+                    this.setIsLoading(false); // Turn off the loader
+                    resolve(result);
+                });
+            });
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось завершить аукцион");
+            this.setIsLoading(false); // Turn off the loader 
+            return "";
+        }
+    }
 }
