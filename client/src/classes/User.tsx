@@ -202,11 +202,10 @@ export default class User {
             console.log(auctionContent.highestPrice, auctionContent.startPrice);
 
 
-            const highestPrice = ethers.utils.formatEther(auctionContent.highestPrice);
-            const startPrice = ethers.utils.formatEther(auctionContent.startPrice);
+            const highestPrice = toEth(auctionContent.highestPrice);
+            const startPrice = toEth(auctionContent.startPrice);
 
             const maxPrice = highestPrice > startPrice ? highestPrice : startPrice;
-            console.log(maxPrice, highestPrice, startPrice);
 
             if (+valueEth > +maxPrice) {
                 const overrides = {
@@ -224,7 +223,7 @@ export default class User {
                 });
             }
 
-            this.setError("Ваша ставка должна быть больше " + toEth(+maxPrice) + "ETH");
+            this.setError("Ваша ставка должна быть больше " + maxPrice + "ETH");
             this.setIsLoading(false); // Turn off the loader
             return false;
         } catch (error) {
