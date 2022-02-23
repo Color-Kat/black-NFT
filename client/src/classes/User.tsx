@@ -12,6 +12,10 @@ interface AuctionContentI {
     highestPrice: BigNumber;
 }
 
+/**
+ * User class interact with User smart contract.
+ */
+
 export default class User {
     public address: string = '';
 
@@ -24,9 +28,10 @@ export default class User {
     }
 
     /**
-     * Call collectNigga in User contact and return nft tokenURI
+     * Call collectNigga in User contact and return nft tokenURI.
      * @returns 
      */
+
     public collectNigga = async (): Promise<string> => {
         try {
             this.setIsLoading(true); // Turn on the loader
@@ -48,6 +53,10 @@ export default class User {
         }
     }
 
+    /** 
+     * Return list of nigga ids of user (Not tokenIds).
+     */
+    
     public getMyNiggasTokenIds = async (): Promise<number[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
@@ -64,31 +73,30 @@ export default class User {
         }
     }
 
-    // public getMyNiggasTokenURIs = async () => {
-    //     try {
-    //         this.setIsLoading(true); // Turn on the loader
-    //         console.log(
-    //             this.userContract
-    //         );
+    /** 
+     * Return list of tokenURIs of user.
+     */
 
-    //         let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
+    public getMyNiggasTokenURIs = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
+            this.setIsLoading(false); // Turn off the loader
 
-    //         this.setIsLoading(false); // Turn off the loader
-
-    //         return myNiggasTokenURIs;
-    //     } catch (error) {
-    //         console.log(error);
-    //         this.setError("Не удалось загрузить список ваших негров");
-    //         return false;
-    //     }
-    // }
+            return myNiggasTokenURIs;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших негров");
+            return false;
+        }
+    }
 
     /**
-     * Return tokenURI of niggaNFT by niggaId
+     * Return tokenURI of niggaNFT by niggaId.
      * 
-     * @param niggaId - id of nigger, not tokenId
-     * @returns 
+     * @param niggaId - id of user's nigger, not tokenId
      */
+    
     public getNiggaURIById = async (niggaId: number): Promise<number[] | false> => {
         try {
             // Check if user has this nigger
@@ -110,6 +118,15 @@ export default class User {
             return [];
         }
     }
+
+    /**
+     * Create new auction of niggaId.
+     * 
+     * @param niggaId id of user's nigga. Not tokenId
+     * @param message description of this auction and nigga
+     * @param startPrice start price of niggaNFT
+     * @returns 
+     */
 
     public createAuction = async (niggaId: number, message: string, startPrice: number): Promise<boolean> => {
         try {
@@ -147,6 +164,10 @@ export default class User {
         }
     }
 
+    /**
+     * Return list of user's auctionIds.
+     */
+
     public getMyAuctionsIds = async (): Promise<number[]> => {
         try {
             this.setIsLoading(true); // Turn on the loader
@@ -163,9 +184,9 @@ export default class User {
     }
 
     /**
-     * Return list of user's auctions content
-     * @returns 
+     * Return list of user's auctions content.
      */
+
     public getMyAuctionsContent = async (): Promise<AuctionContentI[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
@@ -188,25 +209,28 @@ export default class User {
         }
     }
 
+    /**
+     * 
+     * @param auctionId id of the auction to place bid.
+     * @param valueEth value of bid in eth
+     */
+
     public placeBid = async (auctionId: number, valueEth: number) => {
         try {
             this.setIsLoading(true); // Turn on the loader
 
-            // Convert eth value to wei
-            // const valueWei = toWei(valueEth);
-
             // Check if value is higher than highest bid
             const auctionContent: AuctionContentI = await this.userContract.getAuctionContentById(auctionId);
-            // console.log(valueWei.toNumber(), auctionContent.highestPrice.toNumber());
 
-            console.log(auctionContent.highestPrice, auctionContent.startPrice);
-
-
-            const highestPrice = toEth(auctionContent.highestPrice);
+            // Get starting price and highest bid
             const startPrice = toEth(auctionContent.startPrice);
+            const highestPrice = toEth(auctionContent.highestPrice);
 
-            const maxPrice = highestPrice > startPrice ? highestPrice : startPrice;
+            // Choose the highest price
+            // const maxPrice = highestPrice > startPrice ? highestPrice : startPrice;
+            const maxPrice = Math.max(+startPrice, +highestPrice);
 
+            // User must pay more than the current max price
             if (+valueEth > +maxPrice) {
                 const overrides = {
                     value: toWei(valueEth)
@@ -234,10 +258,15 @@ export default class User {
         }
     }
 
-    public finalizeAuction = async () => {
+    /**
+     * Finalize auction by id.
+     * @param auctionId id of auction to be finalized
+     */
+
+    public finalizeAuction = async (auctionId: number) => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            await this.userContract.finalizeAuction(); // Call method in smart contract
+            await this.userContract.finalizeAuction(auctionId); // Call method in smart contract
 
             // And wait for the AuctionFinalazed event to fire
             return await new Promise<boolean>((resolve, reject) => {

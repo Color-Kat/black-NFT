@@ -50,9 +50,12 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 await usersContract().connectUser();
 
                 // Listen events to get connected user
-                usersContract().on("UserConnect", (user) => {
-                    localStorage.setItem('user_contract_address', user); // Save user contract address to use in future after reload
-                    initUser(user);
+                await new Promise<boolean>(resolve => {
+                    usersContract().on("UserConnect", (user) => {
+                        localStorage.setItem('user_contract_address', user); // Save user contract address to use in future after reload
+                        initUser(user);
+                        resolve(true);
+                    })
                 });
             } else initUser(userContractAddress);
 
@@ -67,8 +70,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         // connectUser();s
         getAuctions();
 
-        // if (user) console.log(user.get(0, 0.0005));
-        if (user) console.log(user.placeBid(0, 0.0061));
+        // if (user) console.log(user.placeBid(0, 0.0061));
 
     }, [user]);
 
@@ -85,6 +87,8 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         if (user) {
             console.log(await user.getMyNiggasTokenIds());
             console.log(await user.getMyAuctionsContent());
+            console.log(await user.getMyNiggasTokenURIs());
+
             // console.log(await user.createAuction(0, 'some message for text', 0.0061));
 
         }
