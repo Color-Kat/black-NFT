@@ -4,12 +4,15 @@ import { auctionContract, nftContract } from "../utils/smartContracts";
 import { toEth, toWei } from "../utils/ethFunctions";
 const { ethereum } = window as any;
 
+enum AuctionState { Running, Finallized };
 interface AuctionContentI {
     owner: string;
     nftTokenId: BigNumber;
     message: string;
     startPrice: BigNumber;
     highestPrice: BigNumber;
+    highestBidder: string;
+    auctionState: AuctionState;
 }
 
 /**
@@ -56,7 +59,7 @@ export default class User {
     /** 
      * Return list of nigga ids of user (Not tokenIds).
      */
-    
+
     public getMyNiggasTokenIds = async (): Promise<number[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
@@ -96,7 +99,7 @@ export default class User {
      * 
      * @param niggaId - id of user's nigger, not tokenId
      */
-    
+
     public getNiggaURIById = async (niggaId: number): Promise<number[] | false> => {
         try {
             // Check if user has this nigger
@@ -183,6 +186,21 @@ export default class User {
         }
     }
 
+    public getAuctionContentById = async (auctionId: number): Promise<AuctionContentI | false> => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let auctionContent: AuctionContentI = await this.userContract.getAuctionContentById(auctionId);
+            this.setIsLoading(false); // Turn off the loader
+
+            return auctionContent;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших аукционов");
+            this.setIsLoading(false); // Turn off the loader
+            return false;
+        }
+    }
+
     /**
      * Return list of user's auctions content.
      */
@@ -195,7 +213,7 @@ export default class User {
             if (auctionsIdsList) {
                 // For every id get auction content
                 return await Promise.all(auctionsIdsList.map(async (auctionId: number) => {
-                    return await this.userContract.getAuctionContentById(auctionId) as AuctionContentI;
+                    return await this.getAuctionContentById(auctionId) as AuctionContentI;
                 }));
             }
 
@@ -219,8 +237,22 @@ export default class User {
         try {
             this.setIsLoading(true); // Turn on the loader
 
-            // Check if value is higher than highest bid
-            const auctionContent: AuctionContentI = await this.userContract.getAuctionContentById(auctionId);
+            // Get auction content for checks
+            const auctionContent = await this.userContract.getAuctionContentById(auctionId);
+
+            // Check if auction exists and is not finalized
+            if (auctionContent && AuctionState.Finallized == auctionContent.auctionState) {
+                this.setError("Такого аукциона не существует");
+                this.setIsLoading(false);
+                return false;
+            }
+
+            // Check if current user is not owner
+            if (await this.userContract.userAddress() == auctionContent.owner) {
+                this.setError("Владелец не может сделать ставку");
+                this.setIsLoading(false);
+                return false;
+            }
 
             // Get starting price and highest bid
             const startPrice = toEth(auctionContent.startPrice);
@@ -266,6 +298,15 @@ export default class User {
     public finalizeAuction = async (auctionId: number) => {
         try {
             this.setIsLoading(true); // Turn on the loader
+
+            // Check if auction exists and is not finalized
+            const auction = await this.getAuctionContentById(auctionId);
+            if (auction && AuctionState.Finallized == auction.auctionState) {
+                this.setError("Такого аукциона не существует");
+                this.setIsLoading(false);
+                return false;
+            }
+
             await this.userContract.finalizeAuction(auctionId); // Call method in smart contract
 
             // And wait for the AuctionFinalazed event to fire
