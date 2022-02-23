@@ -1,4 +1,6 @@
 import { useContext, useEffect, useState } from "react";
+import { ConnectMetamask } from "./components/ConnectMetamask";
+import { InstallMetamask } from "./components/InstallMetamask";
 import { AuctionContext } from "./context/AuctionContext";
 
 function App() {
@@ -22,7 +24,7 @@ function App() {
     }, []);
 
     return (
-        <div className="App">
+        <div className="App w-screen h-screen overflow-x-hidden">
             {error && (
                 <>
                     <h1>Возникла ошибка, НИГГА!</h1>
@@ -30,11 +32,10 @@ function App() {
                 </>
             )}
 
-            {installMetamask && <h1>Установи метамаск, Ниггер!</h1>}
+            {installMetamask && <InstallMetamask />}
 
-            {!currentAccount && (
-                <button onClick={connectWallet}>Подключить метамаск</button>
-            )}
+            {!currentAccount && <ConnectMetamask connectWallet={connectWallet} />}
+
             {currentAccount && (
                 <>
                     {!currentUserContract && (

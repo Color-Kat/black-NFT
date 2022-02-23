@@ -306,7 +306,7 @@ export default class User {
                 this.setIsLoading(false);
                 return false;
             }
-            // check
+            
             await this.userContract.finalizeAuction(auctionId); // Call method in smart contract
 
             // And wait for the AuctionFinalazed event to fire
