@@ -6,6 +6,15 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
     // current eth account
     const [currentAccount, setCurrentAccount] = useState<string>("");
 
+    const resetWallet = (account: string) => {
+        // Reset user contract address if it's another wallet
+        const prevUserAddress = localStorage.getItem("user_address") || "";
+        if (prevUserAddress && prevUserAddress != account)
+            localStorage.setItem('user_contract_address', "");
+
+        localStorage.setItem("user_address", account);
+    }
+
     /**
      * check if is window.ethereum set
      * @returns boolean
@@ -32,6 +41,7 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
 
             // safe wallet address
             if (accounts[0]) {
+                resetWallet(accounts[0]);
                 setCurrentAccount(accounts[0]);
                 setInstallMetamaskCallback(false);
                 setErrorCallback("");
@@ -52,6 +62,7 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
             const accounts = await ethereum.request({ method: "eth_accounts" });
 
             if (accounts[0]) {
+                resetWallet(accounts[0]);
                 setCurrentAccount(accounts[0]);
                 setErrorCallback("");
             }
