@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const { ethereum } = window as any;
 
-const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function) => {
+const useEth = (setErrorCallback: Function, setIsLoadingCallback: Function, setInstallMetamaskCallback: Function) => {
     // current eth account
     const [currentAccount, setCurrentAccount] = useState<string>("");
 
@@ -35,9 +35,11 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
         try {
             if (!checkInstallMetamask()) return;
 
+            setIsLoadingCallback(true);
             // request metamask to get current account
             // it will connect metamask to our app
             const accounts: string[] = await ethereum.request({ method: "eth_requestAccounts" });
+            setIsLoadingCallback(false);
 
             // safe wallet address
             if (accounts[0]) {
@@ -59,7 +61,9 @@ const useEth = (setErrorCallback: Function, setInstallMetamaskCallback: Function
         try {
             if (!checkInstallMetamask()) return;
 
+            setIsLoadingCallback(true);
             const accounts = await ethereum.request({ method: "eth_accounts" });
+            setIsLoadingCallback(false);
 
             if (accounts[0]) {
                 resetWallet(accounts[0]);

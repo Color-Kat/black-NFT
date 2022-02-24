@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { ConnectMetamask } from "./components/ConnectMetamask";
 import { InstallMetamask } from "./components/InstallMetamask";
+import { LoadingScreen } from "./components/LoadingScreen";
 import { Main } from "./components/Main";
 import { AuctionContext } from "./context/AuctionContext";
 
@@ -54,11 +55,8 @@ function App() {
                 </>
             )}
 
-            {isLoading && (
-                <>
-                    <hr /> <span>Загрузка...</span>
-                </>
-            )}
+            {/* Show loader full screen only if metamask account is not connected */}
+            <LoadingScreen show={ (!currentAccount && isLoading) }/>
         </div>
     );
 }

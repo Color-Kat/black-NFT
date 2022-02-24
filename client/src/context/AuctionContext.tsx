@@ -16,7 +16,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         checkInstallMetamask,
         connectWallet,
         checkIfWalletConnected
-    } = useEth(setError, setInstallMetamask);
+    } = useEth(setError, setIsLoading, setInstallMetamask);
 
     // user data
     const [currentUserContract, setCurrentUserContract] = useState<ethers.Contract | null>(null);
