@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { ConnectMetamask } from "./components/ConnectMetamask";
 import { InstallMetamask } from "./components/InstallMetamask";
+import { Main } from "./components/Main";
 import { AuctionContext } from "./context/AuctionContext";
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
     }, []);
 
     return (
-        <div className="App w-screen h-screen overflow-x-hidden">
+        <div className="App w-screen h-screen overflow-hidden">
             {error && (
                 <>
                     <h1>Возникла ошибка, НИГГА!</h1>
@@ -36,18 +37,20 @@ function App() {
 
             {!currentAccount && <ConnectMetamask connectWallet={connectWallet} />}
 
+            {currentAccount && <Main />}
+
             {currentAccount && (
                 <>
-                    {!currentUserContract && (
-                        <button onClick={connectUser}>Подключиться к nigga-system</button>
-                    )}
-                    {user && <>
-                        <button onClick={async () => {
-                            console.log(await user.collectNigga());
-                        }}>Найти негра</button>
-                        <button onClick={() => user.createAuction(0, 'message', 0.0005)}>Создать аукцион</button>
-                    </>}
-                    {/* <button onClick={createAuction}>Создать аукцион</button> */}
+                    {/* // {!currentUserContract && (
+                    //     <button onClick={connectUser}>Подключиться к nigga-system</button>
+                    // )}
+                    // {user && <>
+                    //     <button onClick={async () => {
+                    //         console.log(await user.collectNigga());
+                    //     }}>Найти негра</button>
+                    //     <button onClick={() => user.createAuction(0, 'message', 0.0005)}>Создать аукцион</button>
+                    // </>}
+                    // <button onClick={createAuction}>Создать аукцион</button> */}
                 </>
             )}
 
