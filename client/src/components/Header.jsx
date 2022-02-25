@@ -36,7 +36,7 @@ export const Header = ({ }) => {
                 <nav className="hidden md:block">
                     <ul className="flex">
                         <HeaderLink to="/">Главная</HeaderLink>
-                        <HeaderLink to="/">Аукционы</HeaderLink>
+                        <HeaderLink to="/auctions">Аукционы</HeaderLink>
                         <HeaderLink to="/find">Найти негра</HeaderLink>
                         <HeaderLink to="/create-auction">Создать аукцион</HeaderLink>
                     </ul>
@@ -68,7 +68,7 @@ export const Header = ({ }) => {
             >
                 <ul className="flex flex-col pl-5 ">
                     <HeaderLinkMobile to="/">Главная</HeaderLinkMobile>
-                    <HeaderLinkMobile to="/">Аукционы</HeaderLinkMobile>
+                    <HeaderLinkMobile to="/auctions">Аукционы</HeaderLinkMobile>
                     <HeaderLinkMobile to="/find">Найти негра</HeaderLinkMobile>
                     <HeaderLinkMobile to="/create-auction">Создать аукцион</HeaderLinkMobile>
                 </ul>
