@@ -6,7 +6,7 @@ import { Header } from "./Header";
 
 export const Main = ({ }) => {
     return (
-        <div id="main" className="flex flex-col h-screen">
+        <div id="main" className="flex flex-col h-screen overflow-auto">
             <Header />
 
             <Content />

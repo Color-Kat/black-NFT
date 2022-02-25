@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
+
 import { LoginButton } from "./elements/LoginButton";
 
 const HeaderLink = ({ to, children }) => {
@@ -14,8 +17,13 @@ const HeaderLinkMobile = ({ to, children }) => {
 
 export const Header = ({ }) => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const location = useLocation();
 
     function toggleMenu() { setShowMobileMenu(prev => !prev) }
+
+    useEffect(() => {
+        setShowMobileMenu(false);
+    }, [location]);
 
     return (
         <header className="flex w-full h-16 bg-slate-800 justify-center text-slate-400 shadow-xl">
@@ -55,7 +63,7 @@ export const Header = ({ }) => {
             <nav
                 className={`
                         block md:hidden fixed ${showMobileMenu ? 'right-0' : '-right-full'} transition-all
-                        h-screen w-full sm:w-1/2 bg-slate-800 pt-20 shadow-2xl
+                        h-screen w-full sm:w-1/2 bg-slate-800 pt-20 shadow-2xl z-20
                     `}
             >
                 <ul className="flex flex-col pl-5 ">
@@ -69,6 +77,11 @@ export const Header = ({ }) => {
                     @copyright NiggaNft. <br /> All rights reserved.
                 </span>
             </nav>
+
+            <div
+                onClick={() => setShowMobileMenu(false)}
+                className={`w-screen h-screen absolute ${showMobileMenu ? "pointer-events-auto" : "pointer-events-none"} z-10`}
+            ></div>
         </header>
     );
 }
