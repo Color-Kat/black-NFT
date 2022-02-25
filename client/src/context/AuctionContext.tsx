@@ -68,10 +68,10 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
     useEffect(() => {
         // connectUser();s
-        getAuctions();
+        // getAuctions();
 
         // if (user) console.log(user.placeBid(0, 0.001));
-        if (user) console.log(user.finalizeAuction(0));
+        // if (user) console.log(user.finalizeAuction(0));
 
     }, [user]);
 

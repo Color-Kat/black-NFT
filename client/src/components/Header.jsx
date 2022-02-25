@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { LoginButton } from "./elements/LoginButton";
 
 const HeaderLink = ({ to, children }) => {
     return <li className="mx-3 list-none hover:scale-105 hover:text-slate-300"><Link to={to}>{children}</Link></li>;
@@ -33,7 +34,7 @@ export const Header = ({ }) => {
                     </ul>
                 </nav>
 
-                <button>Войти</button>
+                <LoginButton />
                 {/* hover:text-slate-300 */}
 
                 {/* Mobile menu */}
@@ -41,10 +42,10 @@ export const Header = ({ }) => {
                 <div
                     onClick={toggleMenu}
                     id="mobile-menu-toggle"
-                    className="flex md:hidden py-1 bg-sky-600 w-8 h-8 rounded-md flex-col items-center justify-evenly hover:bg-sky-700">
-                    <div className="w-4/6 h-1 rounded bg-slate-400 hover:bg-slate-300"></div>
-                    <div className="w-4/6 h-1 rounded bg-slate-400 hover:bg-slate-300"></div>
-                    <div className="w-4/6 h-1 rounded bg-slate-400 hover:bg-slate-300"></div>
+                    className="flex md:hidden py-1  bg-gradient-to-r from-cyan-500 to-blue-500 w-8 h-8 rounded-md flex-col items-center justify-evenly hover:bg-sky-700">
+                    <div className="w-4/6 h-1 rounded bg-slate-200 hover:bg-slate-300"></div>
+                    <div className="w-4/6 h-1 rounded bg-slate-200 hover:bg-slate-300"></div>
+                    <div className="w-4/6 h-1 rounded bg-slate-200 hover:bg-slate-300"></div>
                 </div>
 
 
