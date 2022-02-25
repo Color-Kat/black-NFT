@@ -1,5 +1,7 @@
-import { Content } from "./Content";
+
+
 import { Footer } from "./Footer";
+import { Content } from "./Content";
 import { Header } from "./Header";
 
 export const Main = ({ }) => {
