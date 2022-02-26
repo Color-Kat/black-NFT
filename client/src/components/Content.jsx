@@ -7,7 +7,7 @@ import { Profile } from "./pages/Profile";
 
 export const Content = ({ }) => {
     return (
-        <div id="content" className="bg-green-500 flex-auto flex-shrink-0 flex justify-center">
+        <div id="content" className="flex-auto flex-shrink-0 flex justify-center">
             <div className="container px-5">
                 <Routes>
                     <Route path="/" element={<Home />} />

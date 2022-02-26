@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 
 import { LoginButton } from "./elements/LoginButton";
 
-const HeaderLink = ({ to, children }) => {
+export const HeaderLink = ({ to, children }) => {
     return <li className="mx-3 list-none hover:scale-105 hover:text-slate-300"><Link to={to}>{children}</Link></li>;
 }
 
