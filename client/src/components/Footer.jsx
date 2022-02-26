@@ -19,7 +19,7 @@ export const Footer = ({ }) => {
                     </div>
                 </div>
 
-                <div className="footer__middle-side my-4 md:my-0 mx-10 text-center md:text-left">
+                <div className="footer__middle-side my-4 md:my-0 mx-10 text-center md:text-left border-l-2 border-r-2 px-5 border-slate-700">
                     <h3 className="text-lg font-bold">Навигация:</h3>
                     <nav className="">
                         <ul className="whitespace-nowrap">
