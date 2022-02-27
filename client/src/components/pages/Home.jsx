@@ -4,13 +4,13 @@ export const Home = ({ scrollElement }) => {
     const sectionRef = useRef();
 
     const scroll = () => {
-        console.log(sectionRef.current.offsetTop);
-        scrollElement.current.scrollBy(0, sectionRef.current.offsetTop)
+        // console.log((sectionRef.current.offsetTop - sectionRef.current.offsetHeight));
+        scrollElement.current.scrollBy(0, sectionRef.current.offsetTop);
     }
 
     return (
         <section id="home-page" className="page">
-            <section className="introducing-section flex justify-evenly flex-col-reverse lg:flex-row pb-10 mb-6 border-b-0 border-slate-600">
+            <section className=" introducing-section flex justify-evenly flex-col-reverse lg:flex-row pb-10 mb- border-b-0 border-slate-600 lg:my-24 bg-slate-700 px-4 lg:px-0 py-12 rounded-2xl  shadow-lg">
                 <div className="introducing-section__left text-slate-400 max-w-xl">
                     <h1 className="text-4xl font-extrabold mb-3">NiggaNFT🤑🤑🤑</h1>
                     <span className="text-xl">
