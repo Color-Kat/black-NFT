@@ -3,13 +3,16 @@
 import { Footer } from "./Footer";
 import { Content } from "./Content";
 import { Header } from "./Header";
+import { useRef } from "react";
 
 export const Main = ({ }) => {
+    const mainRef = useRef();
+
     return (
-        <div id="main" className="flex flex-col h-screen overflow-auto">
+        <div id="main" ref={mainRef} className="flex flex-col h-screen overflow-auto">
             <Header />
 
-            <Content />
+            <Content scrollElement={mainRef} />
 
             <Footer />
         </div>
