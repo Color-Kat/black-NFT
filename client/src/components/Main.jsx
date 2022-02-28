@@ -9,7 +9,7 @@ export const Main = ({ }) => {
     const mainRef = useRef();
 
     return (
-        <div id="main" ref={mainRef} className="flex flex-col h-screen overflow-auto">
+        <div id="main" ref={mainRef} className="flex flex-col h-screen overflow-auto overflow-x-hidden">
             <Header />
 
             <Content scrollElement={mainRef} />

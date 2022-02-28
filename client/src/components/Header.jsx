@@ -26,7 +26,7 @@ export const Header = ({ }) => {
     }, [location]);
 
     return (
-        <header className="flex sticky top-0  w-full h-16 bg-slate-800 justify-center text-slate-400 shadow-xl">
+        <header className="flex sticky top-0  w-full h-16 bg-slate-800 justify-center text-slate-400 shadow-xl z-10">
             <div className="container flex items-center justify-between px-5 z-30">
                 <HeaderLink to="/">
                     <img src="./assets/logo.png" alt="" className="h-12" />
@@ -62,7 +62,7 @@ export const Header = ({ }) => {
             {/* Mobile menu */}
             <nav
                 className={`
-                        block md:hidden fixed ${showMobileMenu ? 'right-0' : '-right-full'} transition-all
+                        block md:hidden fixed top-0 ${showMobileMenu ? 'right-0' : '-right-full'} transition-all
                         h-screen w-full sm:w-1/2 bg-slate-800 pt-20 shadow-2xl z-20
                     `}
             >

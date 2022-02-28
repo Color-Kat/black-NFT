@@ -85,7 +85,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
      * get auctions list from blockchain
      */
     const getAuctions = async () => {
-        console.log(user);
+        // console.log(user);
 
         if (user) {
 

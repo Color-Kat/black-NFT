@@ -23,7 +23,7 @@ export const Home = ({ scrollElement }) => {
                 </div>
             </section>
 
-            <div className="more-arrow-domn w-full flex justify-center text-slate-400 animate-bounce" onClick={scroll}>
+            <div className="more-arrow-domn w-full flex justify-center text-slate-400 animate-bounce z-0" onClick={scroll}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12  cursor-pointer p-2 border-2 rounded-full border-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>

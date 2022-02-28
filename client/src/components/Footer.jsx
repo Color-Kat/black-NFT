@@ -6,13 +6,13 @@ export const Footer = ({ }) => {
         <footer className="flex justify-center bg-slate-800 text-slate-400 shadow-xl py-4">
             <div className="container px-5 flex-col md:flex-row flex justify-between">
                 <div className="footer__left-side flex flex-col items-center">
-                    <div className="w-max flex bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl p-3 mb-2 text-slate-800">
+                    <div className="w-max flex opacity-70 hover:opacity-100 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl p-3 mb-2 text-slate-800">
                         <Link to="/">
                             <span className="text-3xl font-bold flex"><img src="./assets/logo.png" alt="NiggaNft" className="h-8" /> NiggaNFT</span>
                         </Link>
                     </div>
 
-                    <div className="flex bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl p-4">
+                    <div className="flex opacity-70 hover:opacity-100 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl p-4">
                         <a href="https://blacklivesmatter.com/" target="_blank">
                             <img src="./assets/images/black-lives-matter.png" alt="Black lives matter" className="max-h-24" />
                         </a>
