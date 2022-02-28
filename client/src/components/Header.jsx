@@ -26,7 +26,7 @@ export const Header = ({ }) => {
     }, [location]);
 
     return (
-        <header className="flex w-full h-16 bg-slate-800 justify-center text-slate-400 shadow-xl">
+        <header className="flex sticky top-0  w-full h-16 bg-slate-800 justify-center text-slate-400 shadow-xl">
             <div className="container flex items-center justify-between px-5 z-30">
                 <HeaderLink to="/">
                     <img src="./assets/logo.png" alt="" className="h-12" />

@@ -70,7 +70,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         // connectUser();s
         // getAuctions();
 
-        // if (user) console.log(user.placeBid(0, 0.001));
+        if (user) getAuctions();
         // if (user) console.log(user.finalizeAuction(0));
 
     }, [user]);
@@ -85,9 +85,12 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
      * get auctions list from blockchain
      */
     const getAuctions = async () => {
+        console.log(user);
+
         if (user) {
-            console.log(await user.getMyNiggasTokenIds());
-            console.log(await user.getMyAuctionsContent());
+
+            // console.log(await user.getMyNiggasTokenIds());
+            // console.log(await user.getMyAuctionsContent());
             console.log(await user.getMyNiggasTokenURIs());
 
             // console.log(await user.createAuction(0, 'some message for text', 0.0061));
