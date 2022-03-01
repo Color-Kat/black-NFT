@@ -1,7 +1,11 @@
-import { useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { AuctionContext } from "../../context/AuctionContext";
 import { dataURI2string } from "../../utils/dataURI2string";
+
+// Modal
+import Rodal from 'rodal';
+import 'rodal/lib/rodal.css';
 
 export const FindNigga = ({ }) => {
     const [jungleSlide, setJungleSlide] = useState(1);
@@ -23,13 +27,12 @@ export const FindNigga = ({ }) => {
 
         setIsLoading(true);
 
-        // const animationTimer = setInterval(nextSlide, 500);
+        const animationTimer = setInterval(nextSlide, 500);
         // let niggaTokenBase64 = await user.collectNigga();
         const niggaTokenURI = JSON.parse(dataURI2string('data:application/json;base64,eyJuYW1lIjoibmlnZ2EiLCJkZXNjcmlwdGlvbiI6Ik5pZ2dhIGRlc2NyaXB0aW9uIiwiYXR0cmlidXRlcyI6IiIsImltYWdlIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUdobGFXZG9kRDBpTlRBd01qRXdJaUIzYVdSMGFEMGlOVEF3SWo0OGNHRjBhQ0JrUFNKTk5UUWdOellnSWlCbWFXeHNQU0owY21GdWMzQmhjbVZ1ZENJZ2MzUnliMnRsUFNJalptTmlZVEF6SWk4K1BIQmhkR2dnWkQwaVREWXdJRFEyTnlCTU5DQXlPRGNnVERNek5DQXhPVGtnVERZeElETXdOeUFpSUdacGJHdzlJblJ5WVc1emNHRnlaVzUwSWlCemRISnZhMlU5SWlNME56azVNREFpTHo0OGNHRjBhQ0JrUFNKTk16VXdJRE0zTUNBaUlHWnBiR3c5SW5SeVlXNXpjR0Z5Wlc1MElpQnpkSEp2YTJVOUlpTXpNVFl6WldJaUx6NDhjR0YwYUNCa1BTSk5NVEU1SURJd01pQk5Namc1SURRd01pQk1OREV6SURFME1pQk1NelkwSURRek5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pNTVNBeE1UVWdURE00TUNBek1ESWdUVEV5SURFMk1pQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pOTVRReUlESTFJRXcwTWlBeU5EVWdUVEl5TkNBNE5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4TDNOMlp6ND0ifQ=='));
         const niggaSvg = dataURI2string(niggaTokenURI.image, 'data:image/svg+xml;base64,'.length);
-
         setResultNigga(niggaSvg);
-        // clearInterval(animationTimer);
+        clearInterval(animationTimer);
 
         // data:application/json;base64,eyJuYW1lIjoibmlnZ2EiLCJkZXNjcmlwdGlvbiI6Ik5pZ2dhIGRlc2NyaXB0aW9uIiwiYXR0cmlidXRlcyI6IiIsImltYWdlIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUdobGFXZG9kRDBpTlRBd01qRXdJaUIzYVdSMGFEMGlOVEF3SWo0OGNHRjBhQ0JrUFNKTk5UUWdOellnSWlCbWFXeHNQU0owY21GdWMzQmhjbVZ1ZENJZ2MzUnliMnRsUFNJalptTmlZVEF6SWk4K1BIQmhkR2dnWkQwaVREWXdJRFEyTnlCTU5DQXlPRGNnVERNek5DQXhPVGtnVERZeElETXdOeUFpSUdacGJHdzlJblJ5WVc1emNHRnlaVzUwSWlCemRISnZhMlU5SWlNME56azVNREFpTHo0OGNHRjBhQ0JrUFNKTk16VXdJRE0zTUNBaUlHWnBiR3c5SW5SeVlXNXpjR0Z5Wlc1MElpQnpkSEp2YTJVOUlpTXpNVFl6WldJaUx6NDhjR0YwYUNCa1BTSk5NVEU1SURJd01pQk5Namc1SURRd01pQk1OREV6SURFME1pQk1NelkwSURRek5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pNTVNBeE1UVWdURE00TUNBek1ESWdUVEV5SURFMk1pQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pOTVRReUlESTFJRXcwTWlBeU5EVWdUVEl5TkNBNE5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4TDNOMlp6ND0ifQ==
 
@@ -39,6 +42,19 @@ export const FindNigga = ({ }) => {
     return (
         <section id="find-nigga-page" className="page">
             <h1 className="find-nigga__title text-4xl text-slate-400 font-bold mb-8">Отправить экспедицию</h1>
+
+            {/* Modal */}
+            <Rodal
+                visible={!!resultNigga} animation="door"
+                onClose={() => { setResultNigga('') }}
+                customStyles={{ borderRadius: '20px', height: 'max-content', background: 'rgb(203 213 225 / var(--tw-bg-opacity))' }}
+            >
+                <div className="">
+                    <h3>Негр нашёлся!</h3>
+                    <span>Экспедиция привела нового негра.</span>
+                    <div className="niggaImage h-96" dangerouslySetInnerHTML={{ __html: resultNigga }}></div>
+                </div>
+            </Rodal>
 
             <div className="find-nigga__container flex flex-col md:flex-row">
                 <div className="find-nigga__left bg-slate-700 px-4 pt-12 pb-6 rounded-2xl shadow-md md:mr-5 flex flex-col items-center">
