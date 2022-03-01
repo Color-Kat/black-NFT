@@ -39,6 +39,18 @@ export const FindNigga = ({ }) => {
         setIsLoading(false);
     }
 
+    function renderSVG(svg) {
+        // let svgContainer = document.createElement('div');
+        // svgContainer.innerHTML = svg;
+        // if (svgContainer.firstChild) {
+        //     svgContainer.firstChild.classList.add("w-32 h-32");
+        // }
+        // console.log(svgContainer.firstChild);
+        // return svgContainer.firstChild;
+        // TODO right ration and display of migga image
+        return svg;
+    }
+
     return (
         <section id="find-nigga-page" className="page">
             <h1 className="find-nigga__title text-4xl text-slate-400 font-bold mb-8">Отправить экспедицию</h1>
@@ -50,9 +62,9 @@ export const FindNigga = ({ }) => {
                 customStyles={{ borderRadius: '20px', height: 'max-content', background: 'rgb(203 213 225 / var(--tw-bg-opacity))' }}
             >
                 <div className="">
-                    <h3>Негр нашёлся!</h3>
-                    <span>Экспедиция привела нового негра.</span>
-                    <div className="niggaImage h-96" dangerouslySetInnerHTML={{ __html: resultNigga }}></div>
+                    <h3 className="font-bold font-mono text-3xl text-slate-700">Негр нашёлся!</h3>
+                    <span className="font-mono text-xl text-slate-600">Экспедиция привела нового негра.</span>
+                    <div className="niggaImage h-96 overflow-scroll" dangerouslySetInnerHTML={{ __html: renderSVG(resultNigga) }}></div>
                 </div>
             </Rodal>
 
