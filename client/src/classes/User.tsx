@@ -38,7 +38,8 @@ export default class User {
     public collectNigga = async (): Promise<string> => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            await this.userContract.collectNigga(); // Call method in smart contract
+            let some = await this.userContract.collectNigga(); // Call method in smart contract
+            console.log(some);
 
             // And wait for the NiggaCollect event to fire
             return await new Promise<string>((resolve, reject) => {
@@ -306,7 +307,7 @@ export default class User {
                 this.setIsLoading(false);
                 return false;
             }
-            
+
             await this.userContract.finalizeAuction(auctionId); // Call method in smart contract
 
             // And wait for the AuctionFinalazed event to fire

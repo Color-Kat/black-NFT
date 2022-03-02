@@ -22,20 +22,32 @@ export const FindNigga = ({ }) => {
     const { user } = useContext(AuctionContext);
 
     const findNigga = async () => {
-        // if (!user) return;
+        if (!user) return;
 
+        setIsLoading(true); // Turn on the loading
 
-        setIsLoading(true);
-
+        // Show animation of nigga searching
         const animationTimer = setInterval(nextSlide, 500);
-        // let niggaTokenBase64 = await user.collectNigga();
-        const niggaTokenURI = JSON.parse(dataURI2string('data:application/json;base64,eyJuYW1lIjoibmlnZ2EiLCJkZXNjcmlwdGlvbiI6Ik5pZ2dhIGRlc2NyaXB0aW9uIiwiYXR0cmlidXRlcyI6IiIsImltYWdlIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUdobGFXZG9kRDBpTlRBd01qRXdJaUIzYVdSMGFEMGlOVEF3SWo0OGNHRjBhQ0JrUFNKTk5UUWdOellnSWlCbWFXeHNQU0owY21GdWMzQmhjbVZ1ZENJZ2MzUnliMnRsUFNJalptTmlZVEF6SWk4K1BIQmhkR2dnWkQwaVREWXdJRFEyTnlCTU5DQXlPRGNnVERNek5DQXhPVGtnVERZeElETXdOeUFpSUdacGJHdzlJblJ5WVc1emNHRnlaVzUwSWlCemRISnZhMlU5SWlNME56azVNREFpTHo0OGNHRjBhQ0JrUFNKTk16VXdJRE0zTUNBaUlHWnBiR3c5SW5SeVlXNXpjR0Z5Wlc1MElpQnpkSEp2YTJVOUlpTXpNVFl6WldJaUx6NDhjR0YwYUNCa1BTSk5NVEU1SURJd01pQk5Namc1SURRd01pQk1OREV6SURFME1pQk1NelkwSURRek5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pNTVNBeE1UVWdURE00TUNBek1ESWdUVEV5SURFMk1pQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pOTVRReUlESTFJRXcwTWlBeU5EVWdUVEl5TkNBNE5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4TDNOMlp6ND0ifQ=='));
-        const niggaSvg = dataURI2string(niggaTokenURI.image, 'data:image/svg+xml;base64,'.length);
-        setResultNigga(niggaSvg);
-        clearInterval(animationTimer);
 
+        let niggaTokenBase64 = await user.collectNigga(); // Get data base64 tokenURI
+
+        // console.log(niggaTokenBase64);
+        if (!niggaTokenBase64) {
+            clearInterval(animationTimer);
+            setIsLoading(false);
+        }
+
+        // const niggaTokenURI = JSON.parse(dataURI2string('data:application/json;base64,eyJuYW1lIjoibmlnZ2EiLCJkZXNjcmlwdGlvbiI6Ik5pZ2dhIGRlc2NyaXB0aW9uIiwiYXR0cmlidXRlcyI6IiIsImltYWdlIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUdobGFXZG9kRDBpTlRBd01qRXdJaUIzYVdSMGFEMGlOVEF3SWo0OGNHRjBhQ0JrUFNKTk5UUWdOellnSWlCbWFXeHNQU0owY21GdWMzQmhjbVZ1ZENJZ2MzUnliMnRsUFNJalptTmlZVEF6SWk4K1BIQmhkR2dnWkQwaVREWXdJRFEyTnlCTU5DQXlPRGNnVERNek5DQXhPVGtnVERZeElETXdOeUFpSUdacGJHdzlJblJ5WVc1emNHRnlaVzUwSWlCemRISnZhMlU5SWlNME56azVNREFpTHo0OGNHRjBhQ0JrUFNKTk16VXdJRE0zTUNBaUlHWnBiR3c5SW5SeVlXNXpjR0Z5Wlc1MElpQnpkSEp2YTJVOUlpTXpNVFl6WldJaUx6NDhjR0YwYUNCa1BTSk5NVEU1SURJd01pQk5Namc1SURRd01pQk1OREV6SURFME1pQk1NelkwSURRek5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pNTVNBeE1UVWdURE00TUNBek1ESWdUVEV5SURFMk1pQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pOTVRReUlESTFJRXcwTWlBeU5EVWdUVEl5TkNBNE5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4TDNOMlp6ND0ifQ=='));
+        const niggaTokenURI = JSON.parse(dataURI2string(niggaTokenBase64)); // Get tokenURI in json format
+        const niggaSvg = dataURI2string(
+            niggaTokenURI.image, 'data:image/svg+xml;base64,'.length
+        );  // Get svg code of image from json
+
+        setResultNigga(niggaSvg);
         // data:application/json;base64,eyJuYW1lIjoibmlnZ2EiLCJkZXNjcmlwdGlvbiI6Ik5pZ2dhIGRlc2NyaXB0aW9uIiwiYXR0cmlidXRlcyI6IiIsImltYWdlIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUdobGFXZG9kRDBpTlRBd01qRXdJaUIzYVdSMGFEMGlOVEF3SWo0OGNHRjBhQ0JrUFNKTk5UUWdOellnSWlCbWFXeHNQU0owY21GdWMzQmhjbVZ1ZENJZ2MzUnliMnRsUFNJalptTmlZVEF6SWk4K1BIQmhkR2dnWkQwaVREWXdJRFEyTnlCTU5DQXlPRGNnVERNek5DQXhPVGtnVERZeElETXdOeUFpSUdacGJHdzlJblJ5WVc1emNHRnlaVzUwSWlCemRISnZhMlU5SWlNME56azVNREFpTHo0OGNHRjBhQ0JrUFNKTk16VXdJRE0zTUNBaUlHWnBiR3c5SW5SeVlXNXpjR0Z5Wlc1MElpQnpkSEp2YTJVOUlpTXpNVFl6WldJaUx6NDhjR0YwYUNCa1BTSk5NVEU1SURJd01pQk5Namc1SURRd01pQk1OREV6SURFME1pQk1NelkwSURRek5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pNTVNBeE1UVWdURE00TUNBek1ESWdUVEV5SURFMk1pQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4Y0dGMGFDQmtQU0pOTVRReUlESTFJRXcwTWlBeU5EVWdUVEl5TkNBNE5TQWlJR1pwYkd3OUluUnlZVzV6Y0dGeVpXNTBJaUJ6ZEhKdmEyVTlJaU0wTnprNU1EQWlMejQ4TDNOMlp6ND0ifQ==
 
+        // Stop animation and turn off the loading
+        clearInterval(animationTimer);
         setIsLoading(false);
     }
 
