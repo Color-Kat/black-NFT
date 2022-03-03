@@ -65,6 +65,7 @@ export default class User {
         try {
             this.setIsLoading(true); // Turn on the loader
             let myNiggasIDs = (await this.userContract.getMyNiggaTokenIds()).map((id: BigNumber) => id.toNumber());
+            console.log(myNiggasIDs);
 
             this.setIsLoading(false); // Turn off the loader
 
