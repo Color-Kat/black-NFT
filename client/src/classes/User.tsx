@@ -79,10 +79,67 @@ export default class User {
     }
 
     /** 
-     * Return list of tokenURIs of user.
-     */
+    * Return list of tokenURIs of user.
+    * Variant 1
+    */
 
     public getMyNiggasTokenURIs = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
+
+
+            const tokenIds = await this.getMyNiggasTokenIds();
+            console.log(tokenIds);
+
+            const niggas = (tokenIds || []).map(async (tokenId, index) => {
+                return await new Promise(async (resolve) => {
+                    resolve({
+                        tokenId,
+                        tokenURI: await this.getNiggaURIById(tokenId)
+                    });
+                })
+            });
+
+            console.log(niggas);
+
+            this.setIsLoading(false); // Turn off the loader
+
+            return niggas;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших негров");
+            return false;
+        }
+    }
+
+    /**
+     * Return myNiggas indexes
+     * CRUTCH!
+     */
+    public getMyNiggasIndexes = async () => {
+        try {
+            this.setIsLoading(true); // Turn on the loader
+            // Because in smart conract we can't get my nigga indexes
+            // conver sorted tokenIDs list to indexes
+            let myNiggasTokenIDs = (await this.getMyNiggasTokenIds() || []).sort();
+            const niggasIndexes = myNiggasTokenIDs.map((tokenId, index) => index);
+            this.setIsLoading(false); // Turn off the loader
+
+            return niggasIndexes;
+        } catch (error) {
+            console.log(error);
+            this.setError("Не удалось загрузить список ваших негров");
+            return false;
+        }
+    }
+
+    /** 
+     * Return list of tokenURIs of user.
+     * Variant 2
+     */
+
+    public getMyNiggasTokenURI2 = async () => {
         try {
             this.setIsLoading(true); // Turn on the loader
             let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();

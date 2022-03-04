@@ -70,7 +70,7 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         // connectUser();s
         // getAuctions();
 
-        if (user) getAuctions();
+        // if (user) getAuctions();
         // if (user) console.log(user.finalizeAuction(0));
 
     }, [user]);

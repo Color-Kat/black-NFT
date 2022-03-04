@@ -4,7 +4,14 @@ import Rodal from 'rodal';
 import 'rodal/lib/rodal.css';
 import { AuctionContext } from "../../context/AuctionContext";
 
+function ALoader() {
+    return (
+        <div>Загрузка</div>
+    );
+}
+
 export const CreateAuction = ({ }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
     // Toggle steps of creating auction
@@ -15,22 +22,19 @@ export const CreateAuction = ({ }) => {
 
 
     const { user } = useContext(AuctionContext);
-    const [myNiggas, setMyNiggas] = useState([]);
+    const [myNiggasIndexes, setMyNiggasIndexes] = useState([]);
 
     useEffect(async () => {
         if (user) {
-            const tokenIds = await user.getMyNiggasTokenIds();
-            console.log(tokenIds);
-
-            const niggas = tokenIds.map((tokenId, index) => {
-                return {
-                    tokenId,
-                    tokenURI: await user.getNiggaURIById(tokenId)
-                }
+            console.log(123);
+            setIsLoading(true);
+            const niggasIndexes = await user.getMyNiggasIndexes();
+            const niggas = niggasIndexes.map(async (niggaIndex) => {
+                return await new Promise(async resolve => resolve(await user.getNiggaURIById(niggaIndex)));
             });
-
             console.log(niggas);
-
+            setMyNiggasIndexes(niggas);
+            setIsLoading(false);
         }
     }, []);
 
@@ -58,7 +62,16 @@ export const CreateAuction = ({ }) => {
                         <div className="create-auction__form bg-slate-700 px-4 rounded-2xl p-5 shadow-md flex-1 mt-5 md:mt-0 text-left">
                             <h3 className="text-2xl font-bold text-slate-500 mb-3">Выберите негра:</h3>
                             <div>
-
+                                {isLoading
+                                    ? <ALoader />
+                                    : <div>
+                                        {myNiggasIndexes.map(async niggaURI => {
+                                            // const niggaURI = await user.getNiggaURIById(niggaIndex);
+                                            console.log(niggaURI);
+                                            return (123);
+                                        })}
+                                    </div>
+                                }
                             </div>
                         </div>
                     </>
