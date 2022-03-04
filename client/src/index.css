@@ -6,7 +6,7 @@
   margin: 2rem 0;
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity));
-  padding: 3rem;
+  padding: 2rem;
   border-radius: 25px;
 
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3),
@@ -22,4 +22,15 @@
     padding: 1.5rem;
     border-radius: 23px;
   }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
