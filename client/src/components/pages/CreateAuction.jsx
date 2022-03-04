@@ -29,14 +29,22 @@ export const CreateAuction = ({ }) => {
             console.log(123);
             setIsLoading(true);
             const niggasIndexes = await user.getMyNiggasIndexes();
-            const niggas = niggasIndexes.map(async (niggaIndex) => {
-                return await new Promise(async resolve => resolve(await user.getNiggaURIById(niggaIndex)));
-            });
+            console.log(niggasIndexes);
+            const niggas = await Promise.all(niggasIndexes.map(async (niggaIndex) => {
+                console.log(niggaIndex);
+                return await user.getNiggaURIById(niggaIndex);
+            }));
             console.log(niggas);
-            setMyNiggasIndexes(niggas);
+
+            // const niggas = await Promise.all(niggasIndexes.map(async (niggaIndex) => {
+            //     return await new Promise(async resolve => resolve(await user.getNiggaURIById(niggaIndex)));
+            // }));
+
+            // console.log(niggas);
+            // setMyNiggasIndexes(niggas);
             setIsLoading(false);
         }
-    }, []);
+    }, [user]);
 
 
     return (

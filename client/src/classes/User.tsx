@@ -65,7 +65,6 @@ export default class User {
         try {
             this.setIsLoading(true); // Turn on the loader
             let myNiggasIDs = (await this.userContract.getMyNiggaTokenIds()).map((id: BigNumber) => id.toNumber());
-            console.log(myNiggasIDs);
 
             this.setIsLoading(false); // Turn off the loader
 
@@ -159,25 +158,30 @@ export default class User {
      * @param niggaId - id of user's nigger, not tokenId
      */
 
-    public getNiggaURIById = async (niggaId: number): Promise<number[] | false> => {
+    public getNiggaURIById = async (niggaIndex: number): Promise<string> => {
         try {
+            const niggasIds = await this.getMyNiggasTokenIds(); // Get tokenIDs of user
+            // Convert niggaIndex to nigga TokenId
+            const niggaTokenIdFromIndex =
+                (await this.userContract.getNiggaTokenIdById(niggaIndex)).toNumber();
+
             // Check if user has this nigger
-            const niggasIds = await this.getMyNiggasTokenIds();
-            if (niggasIds && niggasIds.includes(niggaId)) {
+            if (niggasIds && niggasIds.includes(niggaTokenIdFromIndex)) {
+
                 this.setIsLoading(true); // Turn on the loader
-                let niggaTokenURI = await this.userContract.getNiggaById(niggaId);
+                let niggaTokenURI = await this.userContract.getNiggaById(niggaIndex);
                 this.setIsLoading(false); // Turn off the loader
 
                 return niggaTokenURI;
             }
 
-            this.setError("Вам не принадлежит ниггер№" + niggaId);
-            return [];
+            this.setError("Вам не принадлежит ниггер№" + niggaIndex);
+            return '';
         } catch (error) {
             console.log(error);
-            this.setError("Не удалось найти негра №" + niggaId);
+            this.setError("Не удалось найти негра №" + niggaIndex);
             this.setIsLoading(false); // Turn off the loader
-            return [];
+            return '';
         }
     }
 
