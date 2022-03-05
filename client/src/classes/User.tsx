@@ -38,8 +38,9 @@ export default class User {
     public collectNigga = async (): Promise<string> => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            let some = await this.userContract.collectNigga(); // Call method in smart contract
-            console.log(some);
+            await this.userContract.collectNigga({
+                // gasLimit: 40000
+            }); // Call method in smart contract
 
             // And wait for the NiggaCollect event to fire
             return await new Promise<string>((resolve, reject) => {

@@ -23,7 +23,7 @@ export const CreateAuction = ({ }) => {
 
 
     const { user } = useContext(AuctionContext);
-    const [myNiggasIndexes, setMyNiggasIndexes] = useState([]);
+    const [myNiggas, setMyNiggas] = useState([]);
 
     useEffect(async () => {
         if (user) {
@@ -35,22 +35,19 @@ export const CreateAuction = ({ }) => {
                 return await user.getNiggaURIById(niggaIndex);
             }));
 
-            // const niggas = await Promise.all(niggasIndexes.map(async (niggaIndex) => {
-            //     return await new Promise(async resolve => resolve(await user.getNiggaURIById(niggaIndex)));
-            // }));
+            niggas.reverse(); // New ones first
 
-            setMyNiggasIndexes(niggas);
+            setMyNiggas(niggas);
             setIsLoading(false);
         }
     }, [user]);
 
 
     return (
-        <section id="create-auction-page" className="page ">
-            <h1 className="create-auction__title text-4xl text-slate-400 font-bold mb-8">Создать аукцион</h1>
+        <section id="create-auction-page" className="page">
+            <h1 className="create-auction__title text-4xl text-slate-400 font-bold mb-3">Создать аукцион</h1>
 
-            <span>Здесь вы можете продать негра другому человеку в формате аукциона.</span>
-
+            <span className="text-slate-500 text-lg font-mono">Здесь вы можете продать негра другому человеку в формате аукциона.</span>
 
             {/* Modal */}
             <Rodal
@@ -64,29 +61,35 @@ export const CreateAuction = ({ }) => {
                 </div>
             </Rodal>
 
-            <div className="create-auction__container flex flex-col md:flex-row">
-
-                {step === 1 &&
-                    <>
-                        <div className="create-auction__form relative bg-slate-700 px-4 rounded-2xl p-5 shadow-md flex-1 mt-5 md:mt-0 text-left">
-                            <h3 className="text-2xl font-bold text-slate-500 mb-3">Выберите негра:</h3>
+            <div className="create-auction__container flex flex-col md:flex-row mt-4">
+                <div className="max-w-full create-auction__form relative bg-slate-700 px-4 rounded-lg p-4 shadow-md flex-1 mt-0 md:mt-1 text-left">
+                    {step === 1 &&
+                        <>
+                            <h3 className="text-2xl font-bold text-slate-500 mb-3">1. Выберите негра:</h3>
                             <div className="w-full overflow-x-scroll no-scrollbar">
                                 {isLoading
                                     ? <ALoader />
                                     : <div className="flex">
-                                        {myNiggasIndexes.map(tokenURIBase64 => {
+                                        {myNiggas.map(tokenURIBase64 => {
                                             // Get tokenURI in json format
                                             const niggaTokenURI = JSON.parse(dataURI2string(tokenURIBase64));
                                             const niggaSvg = dataURI2string(
                                                 niggaTokenURI.image, 'data:image/svg+xml;base64,'.length
                                             );  // Get svg code of image from json
 
-                                            console.log(niggaTokenURI);
                                             return (
-                                                <div className="nigga-card rounded-xl bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900">
-                                                    <div className="nigga-card__image bg-slate-400 no-scrollbar max-h-96 max-w-xl overflow-auto" dangerouslySetInnerHTML={{ __html: niggaSvg }}></div>
-                                                    <div className="bg-slate-800">
-                                                        <h4>{niggaTokenURI.name}</h4>
+                                                <div
+                                                    key={tokenURIBase64}
+                                                    className="nigga-card realtive mr-2 overflow-hidden rounded-xl bg-gradient-to-tl from-gray-700 via-gray-900 to-black hover:bg-gradient-to-bl cursor-pointer"
+                                                    style={{ minWidth: '300px' }}
+                                                >
+                                                    <div
+                                                        className="nigga-card__image bg-slate-900 no-scrollbar overflow-hidden" // scroll
+                                                        dangerouslySetInnerHTML={{ __html: niggaSvg }}
+                                                        style={{ width: '300px', height: '300px' }}
+                                                    ></div>
+                                                    <div className="text-slate-400 p-2 px-3">
+                                                        <h4 className="font-bold text-xl mb-1">{niggaTokenURI.name}</h4>
                                                         <h5>{niggaTokenURI.description}</h5>
                                                     </div>
                                                 </div>
@@ -95,10 +98,11 @@ export const CreateAuction = ({ }) => {
                                     </div>
                                 }
                             </div>
-                        </div>
-                    </>
-                }
+                        </>
+                    }
+                </div>
+
             </div>
-        </section>
+        </section >
     );
 }
