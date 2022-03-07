@@ -29,7 +29,8 @@ export const CreateAuction = ({ }) => {
 
     // Toggle steps of creating auction
     const [step, setStep] = useState(1);
-    const stepNext = () => { setStep(prev => prev + 1); }
+    const stepNext = () => { if (step !== 3) setStep(prev => prev + 1); }
+    const stepPrev = () => { if (step !== 1) setStep(prev => prev - 1); }
 
 
     const { user } = useContext(AuctionContext);
@@ -63,9 +64,8 @@ export const CreateAuction = ({ }) => {
     }, [user]);
 
     const selectNiggaId = (niggaId: number) => {
-        console.log(niggaId);
-
         setAuctionData(prev => ({ ...prev, niggaId }));
+        stepNext(); // Turn on the next step
     }
 
     return (
@@ -86,8 +86,9 @@ export const CreateAuction = ({ }) => {
                 </div>
             </Rodal>
 
-            <div className="create-auction__container flex flex-col md:flex-row mt-4">
+            <div className="create-auction__container  mt-4">
                 <div className="max-w-full create-auction__form relative bg-slate-700 px-4 rounded-lg p-4 shadow-md flex-1 mt-0 md:mt-1 text-left">
+                    {/* STEP 1 */}
                     {step === 1 &&
                         <>
                             <h3 className="text-2xl font-bold text-slate-500 mb-3">1. Выберите негра:</h3>
@@ -131,8 +132,22 @@ export const CreateAuction = ({ }) => {
                             </div>
                         </>
                     }
+
+                    {/* STEP 1 */}
+                    {step === 2 && <>
+                        <h3 className="text-2xl font-bold text-slate-500 mb-3">2. Напишите сообщение:</h3>
+                        <input className="w-full my-2 h-14 bg-slate-800 rounded-full outline-none border-slate-900 active:border-4 px-6 text-slate-200 text-lg" />
+
+
+                    </>}
                 </div>
 
+                <div className="create-auction__navigation w-full flex justify-between mt-6">
+                    {step > 1 ? <button onClick={stepPrev} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-pink-500 to-red-500 text-slate-100 font-bold text-lg">Назад</button> : <div></div>}
+                    <button onClick={stepNext} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">
+                        {step < 3 ? 'Далее' : 'Соз'}    
+                    </button>
+                </div>
             </div>
         </section >
     );
