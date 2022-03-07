@@ -197,6 +197,8 @@ export default class User {
 
     public createAuction = async (niggaId: number, message: string, startPrice: number): Promise<boolean> => {
         try {
+            if (!niggaId || !message || !startPrice) return false;
+
             // Check if user has this nigga
             const niggasIds = await this.getMyNiggasTokenIds();
             if (niggasIds && niggasIds.includes(niggaId)) {

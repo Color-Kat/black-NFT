@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect } from "react";
 import { useContext, useState } from "react";
 import Rodal from 'rodal';
@@ -11,28 +12,43 @@ function ALoader() {
     );
 }
 
+export interface IAuctionData {
+    niggaId: number | null;
+    message: string | null;
+    startPrice: number | null;
+}
+
 export const CreateAuction = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [auctionData, setAuctionData] = useState<IAuctionData>({
+        niggaId: null,
+        message: null,
+        startPrice: null
+    });
 
     // Toggle steps of creating auction
     const [step, setStep] = useState(1);
-    const stepNext = () => {
-        setStep(prev => prev + 1);
-    }
+    const stepNext = () => { setStep(prev => prev + 1); }
 
 
     const { user } = useContext(AuctionContext);
-    const [myNiggas, setMyNiggas] = useState([]);
+    const [myNiggas, setMyNiggas] = useState<{
+        niggaId: number,
+        tokenURIBase64: string
+    }[]>([]);
 
-    useEffect(async () => {
+    const loadNiggas = async () => {
         if (user) {
             setIsLoading(true);
             const niggasIndexes = await user.getMyNiggasIndexes();
 
             // Wait for get nigga tokenURI for every niggaIndex
-            const niggas = await Promise.all(niggasIndexes.map(async (niggaIndex) => {
-                return await user.getNiggaURIById(niggaIndex);
+            const niggas = await Promise.all(niggasIndexes.map(async (niggaIndex: number) => {
+                return {
+                    niggaId: niggaIndex, // Save niggaId (niggaIndex)
+                    tokenURIBase64: await user.getNiggaURIById(niggaIndex) // Ans save tokenURI in base64
+                }
             }));
 
             niggas.reverse(); // New ones first
@@ -40,8 +56,17 @@ export const CreateAuction = ({ }) => {
             setMyNiggas(niggas);
             setIsLoading(false);
         }
+    }
+
+    useEffect(() => {
+        loadNiggas();
     }, [user]);
 
+    const selectNiggaId = (niggaId: number) => {
+        console.log(niggaId);
+
+        setAuctionData(prev => ({ ...prev, niggaId }));
+    }
 
     return (
         <section id="create-auction-page" className="page">
@@ -70,7 +95,10 @@ export const CreateAuction = ({ }) => {
                                 {isLoading
                                     ? <ALoader />
                                     : <div className="flex">
-                                        {myNiggas.map(tokenURIBase64 => {
+                                        {myNiggas.map((niggaData, niggaIndex) => {
+                                            const tokenURIBase64 = niggaData.tokenURIBase64;
+                                            const niggaId = niggaData.niggaId;
+
                                             // Get tokenURI in json format
                                             const niggaTokenURI = JSON.parse(dataURI2string(tokenURIBase64));
                                             const niggaSvg = dataURI2string(
@@ -82,6 +110,9 @@ export const CreateAuction = ({ }) => {
                                                     key={tokenURIBase64}
                                                     className="nigga-card realtive mr-2 overflow-hidden rounded-xl bg-gradient-to-tl from-gray-700 via-gray-900 to-black hover:bg-gradient-to-bl cursor-pointer"
                                                     style={{ minWidth: '300px' }}
+                                                    onClick={() => {
+                                                        selectNiggaId(niggaId);
+                                                    }}
                                                 >
                                                     <div
                                                         className="nigga-card__image bg-slate-900 no-scrollbar overflow-hidden" // scroll
