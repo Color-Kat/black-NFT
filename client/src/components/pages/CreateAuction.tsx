@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent, ChangeEventHandler } from "react";
 import { useEffect } from "react";
 import { useContext, useState } from "react";
 import Rodal from 'rodal';
@@ -65,7 +65,12 @@ export const CreateAuction = ({ }) => {
 
     const selectNiggaId = (niggaId: number) => {
         setAuctionData(prev => ({ ...prev, niggaId }));
-        stepNext(); // Turn on the next step
+    }
+
+    const changeMessage = (e: ChangeEvent<HTMLInputElement>) => {
+        setAuctionData(prev => ({ ...prev, message: e.target.value }));
+        console.log(auctionData);
+
     }
 
     return (
@@ -109,7 +114,11 @@ export const CreateAuction = ({ }) => {
                                             return (
                                                 <div
                                                     key={tokenURIBase64}
-                                                    className="nigga-card realtive mr-2 overflow-hidden rounded-xl bg-gradient-to-tl from-gray-700 via-gray-900 to-black hover:bg-gradient-to-bl cursor-pointer"
+                                                    className={`
+                                                        nigga-card realtive mr-2 overflow-hidden rounded-xl 
+                                                         cursor-pointer
+                                                        ${auctionData.niggaId === niggaId ? 'hover:bg-gradient-to-b from-gray-700 via-gray-900 to-black bg-gradient-to-bl' : 'bg-gradient-to-tl from-gray-700 via-gray-900 to-black hover:bg-gradient-to-bl'}
+                                                        `}
                                                     style={{ minWidth: '300px' }}
                                                     onClick={() => {
                                                         selectNiggaId(niggaId);
@@ -136,16 +145,17 @@ export const CreateAuction = ({ }) => {
                     {/* STEP 1 */}
                     {step === 2 && <>
                         <h3 className="text-2xl font-bold text-slate-500 mb-3">2. Напишите сообщение:</h3>
-                        <input className="w-full my-2 h-14 bg-slate-800 rounded-full outline-none border-slate-900 active:border-4 px-6 text-slate-200 text-lg" />
-
-
+                        <input
+                            onChange={changeMessage}
+                            value={auctionData.message || ''}
+                            className="w-full my-2 h-14 bg-slate-800 rounded-full outline-none border-slate-900 active:border-4 px-6 text-slate-200 text-lg" />
                     </>}
                 </div>
 
                 <div className="create-auction__navigation w-full flex justify-between mt-6">
                     {step > 1 ? <button onClick={stepPrev} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-pink-500 to-red-500 text-slate-100 font-bold text-lg">Назад</button> : <div></div>}
                     <button onClick={stepNext} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">
-                        {step < 3 ? 'Далее' : 'Соз'}    
+                        {step < 3 ? 'Далее' : 'Создать'}
                     </button>
                 </div>
             </div>
