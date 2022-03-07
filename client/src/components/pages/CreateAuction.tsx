@@ -20,6 +20,7 @@ export interface IAuctionData {
 
 export const CreateAuction = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
     const [auctionData, setAuctionData] = useState<IAuctionData>({
         niggaId: null,
@@ -67,14 +68,27 @@ export const CreateAuction = ({ }) => {
         setAuctionData(prev => ({ ...prev, niggaId }));
     }
 
-    const changeMessage = (e: ChangeEvent<HTMLInputElement>) => {
+    const changeMessage = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setAuctionData(prev => ({ ...prev, message: e.target.value }));
+    }
+
+    const changeStartPrice = (e: ChangeEvent<HTMLInputElement>) => {
+        setAuctionData(prev => ({ ...prev, startPrice: +e.target.value }));
+    }
+
+    const createAuction = () => {
         console.log(auctionData);
 
+        if (!auctionData.niggaId) setError('Вы не выбрали негра');
+        else if (!auctionData.message) setError('Вы не написали сообщение');
+        else if (!auctionData.startPrice || auctionData.startPrice <= 0) setError('Вы должны указать начальную цену');
+        else {
+
+        }
     }
 
     return (
-        <section id="create-auction-page" className="page">
+        <section id="create-auction-page" className="page  max-w-3xl w-full">
             <h1 className="create-auction__title text-4xl text-slate-400 font-bold mb-3">Создать аукцион</h1>
 
             <span className="text-slate-500 text-lg font-mono">Здесь вы можете продать негра другому человеку в формате аукциона.</span>
@@ -142,21 +156,47 @@ export const CreateAuction = ({ }) => {
                         </>
                     }
 
-                    {/* STEP 1 */}
+                    {/* STEP 2 */}
                     {step === 2 && <>
                         <h3 className="text-2xl font-bold text-slate-500 mb-3">2. Напишите сообщение:</h3>
-                        <input
+                        <textarea
                             onChange={changeMessage}
                             value={auctionData.message || ''}
-                            className="w-full my-2 h-14 bg-slate-800 rounded-full outline-none border-slate-900 active:border-4 px-6 text-slate-200 text-lg" />
+                            placeholder="Сообщение, прикреплённое к негру"
+                            className="w-full py-4 my-2 h-20 bg-slate-800 rounded-xl outline-none px-6 text-slate-200 text-lg" />
+                    </>}
+
+                    {/* STEP 3 */}
+                    {step === 3 && <>
+                        <h3 className="text-2xl font-bold text-slate-500 mb-3">3. Стартовая цена негра:</h3>
+                        <input
+                            onChange={changeStartPrice}
+                            type="number"
+                            step="0.0001"
+                            value={auctionData.startPrice || ''}
+                            placeholder="Стартовая цена (ETH)"
+                            className="w-full my-2 h-14 bg-slate-800 rounded-xl outline-none px-6 text-slate-200 text-lg"
+                        />
                     </>}
                 </div>
 
+                {/* ERRORS */}
+                {error && <div className="h-10 my-2 bg-rose-500 flex items-center justify-center rounded-lg text-lg">
+                    {error}
+                </div>}
+
+                {/* NAVIGATION */}
                 <div className="create-auction__navigation w-full flex justify-between mt-6">
                     {step > 1 ? <button onClick={stepPrev} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-pink-500 to-red-500 text-slate-100 font-bold text-lg">Назад</button> : <div></div>}
-                    <button onClick={stepNext} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">
-                        {step < 3 ? 'Далее' : 'Создать'}
-                    </button>
+
+                    {step < 3
+                        ? <button onClick={stepNext} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">
+                            Далее
+                        </button>
+                        : <button onClick={createAuction} className="py-1.5 px-4 bg-white rounded-full font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">
+                            Создать
+                        </button>
+                    }
                 </div>
             </div>
         </section >
