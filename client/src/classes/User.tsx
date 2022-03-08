@@ -208,13 +208,13 @@ export default class User {
 
                 // When auction is created, load auctions list
                 this.userContract.on("AuctionCreated", async (auctionId: BigNumber) => {
+                    console.log(auctionId);
+                    
                     // To approve trasfer NFT we need to approve auction, so
                     // Get approving data
                     const [nftAddress, auctionAddress] = await this.userContract.getAuctionApprovingData(auctionId);
                     // in NFT contract approve transfering nft for auction contract
                     nftContract(nftAddress).setApprovalForAll(auctionAddress, true);
-
-                    // this.getMyAuctionsContent();
 
                     this.setIsLoading(false); // Turn off the loader
                 });

@@ -9,7 +9,7 @@ export const Home = ({ scrollElement }) => {
     }
 
     return (
-        <section id="home-page" className="page">
+        <section id="home-page" className="page w-full">
             <section className=" introducing-section flex justify-evenly flex-col-reverse lg:flex-row pb-10 mb- border-b-0 border-slate-600 lg:my-24 bg-slate-700 px-4 lg:px-0 py-12 rounded-2xl  shadow-lg">
                 <div className="introducing-section__left text-slate-400 max-w-xl">
                     <h1 className="text-4xl font-extrabold mb-3">NiggaNFT🤑🤑🤑</h1>
