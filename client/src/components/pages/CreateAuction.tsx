@@ -6,6 +6,7 @@ import 'rodal/lib/rodal.css';
 import { AuctionContext } from "../../context/AuctionContext";
 import { dataURI2string } from "../../utils/dataURI2string";
 import User from "../../classes/User";
+import Card from "../elements/Card";
 
 function ALoader() {
     return (
@@ -137,28 +138,16 @@ export const CreateAuction = ({ }) => {
                                             );  // Get svg code of image from json
 
                                             return (
-                                                <div
+                                                <Card
                                                     key={tokenURIBase64}
-                                                    className={`
-                                                        nigga-card realtive mr-2 overflow-hidden rounded-xl 
-                                                         cursor-pointer
-                                                        ${auctionData.niggaId === niggaId ? 'hover:bg-gradient-to-b from-gray-700 via-gray-900 to-black bg-gradient-to-bl' : 'bg-gradient-to-tl from-gray-700 via-gray-900 to-black hover:bg-gradient-to-bl'}
-                                                        `}
-                                                    style={{ minWidth: '300px' }}
-                                                    onClick={() => {
+                                                    isActive={auctionData.niggaId === niggaId}
+                                                    niggaSvg={niggaSvg}
+                                                    title={niggaTokenURI.name}
+                                                    desctiption={niggaTokenURI.description}
+                                                    onClickCallback={() => {
                                                         selectNiggaId(niggaId);
                                                     }}
-                                                >
-                                                    <div
-                                                        className="nigga-card__image bg-slate-900 no-scrollbar overflow-hidden" // scroll
-                                                        dangerouslySetInnerHTML={{ __html: niggaSvg }}
-                                                        style={{ width: '300px', height: '300px' }}
-                                                    ></div>
-                                                    <div className="text-slate-400 p-2 px-3">
-                                                        <h4 className="font-bold text-xl mb-1">{niggaTokenURI.name}</h4>
-                                                        <h5>{niggaTokenURI.description}</h5>
-                                                    </div>
-                                                </div>
+                                                />
                                             );
                                         })}
                                     </div>
