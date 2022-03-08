@@ -22,7 +22,7 @@ export interface IAuctionData {
 export const CreateAuction = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [isSuccess, setIsSuccess] = useState(false);
+    const [isSuccess, setIsSuccess] = useState<boolean>();
     const [auctionData, setAuctionData] = useState<IAuctionData>({
         niggaId: null,
         message: null,
@@ -46,7 +46,7 @@ export const CreateAuction = ({ }) => {
             const niggasIndexes = await user.getMyNiggasIndexes();
 
             // Wait for get nigga tokenURI for every niggaIndex
-            const niggas = await Promise.all(niggasIndexes.map(async (niggaIndex: number) => {
+            const niggas = await Promise.all((niggasIndexes || []).map(async (niggaIndex: number) => {
                 return {
                     niggaId: niggaIndex, // Save niggaId (niggaIndex)
                     tokenURIBase64: await user.getNiggaURIById(niggaIndex) // Ans save tokenURI in base64
@@ -88,10 +88,10 @@ export const CreateAuction = ({ }) => {
             setIsLoading(true);
             setStep(4);
 
-            // const result = await user.createAuction(auctionData.niggaId, auctionData.message, auctionData.startPrice);
-            // setIsSuccess(result);
+            const result = await user.createAuction(auctionData.niggaId, auctionData.message, auctionData.startPrice);
+            setIsSuccess(result);
 
-            // setStep(0);
+            setStep(0);
             setIsLoading(false);
         }
 
@@ -103,15 +103,15 @@ export const CreateAuction = ({ }) => {
 
             <span className="text-slate-500 text-lg font-mono">Здесь вы можете продать негра другому человеку в формате аукциона.</span>
 
-            {/* Modal */}
+            {/* RESULT Modal */}
             <Rodal
-                visible={isSuccess} animation="door"
-                onClose={() => { setIsSuccess(false) }}
-                customStyles={{ borderRadius: '20px', height: 'max-content', background: 'rgb(203 213 225 / var(--tw-bg-opacity))' }}
+                visible={isSuccess !== undefined} animation="door"
+                onClose={() => { setIsSuccess(undefined) }}
+                customStyles={{ borderRadius: '20px', height: 'max-content', background: `rgb(${isSuccess ? '22 163 74' : '220 38 38'})` }}
             >
-                <div className="">
-                    <h3 className="font-bold font-mono text-3xl text-slate-700">Аукцион создан!</h3>
-                    <span className="font-mono text-xl text-slate-600">Ваш негр отображатеся в ленте аукционов.</span>
+                <div className={`${isSuccess ? 'bg-green-600' : 'bg-red-600'} p-3`}>
+                    <h3 className="font-bold font-mono text-3xl text-slate-200 mb-2">{isSuccess ? 'Аукцион создан' : 'Не удалось создать аукцион'}</h3>
+                    <span className="font-mono text-xl text-slate-300">{isSuccess ? 'Ваш негр отображатеся в ленте аукционов.' : 'Отранзакция не обработана. Попробуйте повторить попытку позже.'}</span>
                 </div>
             </Rodal>
 
