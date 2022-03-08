@@ -198,28 +198,33 @@ export default class User {
     public createAuction = async (niggaId: number, message: string, startPrice: number): Promise<boolean> => {
         try {
             if (!niggaId || !message || !startPrice) return false;
-
-            // Check if user has this nigga
+            
+            // Convert niggaIndex to nigga TokenId
+            const niggaTokenIdFromIndex =
+                (await this.userContract.getNiggaTokenIdById(niggaId)).toNumber();
             const niggasIds = await this.getMyNiggasTokenIds();
-            if (niggasIds && niggasIds.includes(niggaId)) {
+            // Check if user has this nigga
+            if (niggasIds && niggasIds.includes(niggaTokenIdFromIndex)) {
                 this.setIsLoading(true); // Turn on the loader
 
                 await this.userContract.sellNigga(niggaId, message, toWei(startPrice));
 
                 // When auction is created, load auctions list
-                this.userContract.on("AuctionCreated", async (auctionId: BigNumber) => {
-                    console.log(auctionId);
-                    
-                    // To approve trasfer NFT we need to approve auction, so
-                    // Get approving data
-                    const [nftAddress, auctionAddress] = await this.userContract.getAuctionApprovingData(auctionId);
-                    // in NFT contract approve transfering nft for auction contract
-                    nftContract(nftAddress).setApprovalForAll(auctionAddress, true);
-
-                    this.setIsLoading(false); // Turn off the loader
+                return await new Promise(resolve => {
+                    this.userContract.on("AuctionCreated", async (auctionId: BigNumber) => {
+                        console.log(auctionId);
+                        
+                        // To approve trasfer NFT we need to approve auction, so
+                        // Get approving data
+                        const [nftAddress, auctionAddress] = await this.userContract.getAuctionApprovingData(auctionId);
+                        // in NFT contract approve transfering nft for auction contract
+                        await nftContract(nftAddress).setApprovalForAll(auctionAddress, true);
+    
+                        this.setIsLoading(false); // Turn off the loader
+                        resolve(true);
+                    });
+    
                 });
-
-                return true;
             }
 
             this.setError("Вам не принадлежит ниггер№" + niggaId);

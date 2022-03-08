@@ -87,6 +87,7 @@ export const CreateAuction = ({ }) => {
             // All right, send create auction request
             setIsLoading(true);
             setStep(4);
+            setError('');
 
             const result = await user.createAuction(auctionData.niggaId, auctionData.message, auctionData.startPrice);
             setIsSuccess(result);
@@ -111,7 +112,7 @@ export const CreateAuction = ({ }) => {
             >
                 <div className={`${isSuccess ? 'bg-green-600' : 'bg-red-600'} p-3`}>
                     <h3 className="font-bold font-mono text-3xl text-slate-200 mb-2">{isSuccess ? 'Аукцион создан' : 'Не удалось создать аукцион'}</h3>
-                    <span className="font-mono text-xl text-slate-300">{isSuccess ? 'Ваш негр отображатеся в ленте аукционов.' : 'Отранзакция не обработана. Попробуйте повторить попытку позже.'}</span>
+                    <span className="font-mono text-xl text-slate-300">{isSuccess ? 'Ваш негр отображатеся в ленте аукционов.' : 'Транзакция не обработана. Попробуйте повторить попытку позже.'}</span>
                 </div>
             </Rodal>
 
@@ -192,7 +193,7 @@ export const CreateAuction = ({ }) => {
                     {/* STEP 4 - WAIT */}
                     {step === 4 && <>
                         <h3 className="text-2xl font-bold text-slate-500 mb-3">4. Лот отправлен:</h3>
-                        <span className="text-lg font-semibold text-slate-400 mb-3">Ожидайте завершения транзакции. Созданные аукционы можно посмотреть в профиле.</span>
+                        <span className="text-lg font-semibold text-slate-400 mb-3">Ожидайте завершения транзакции. Созданные аукционы можно посмотреть в профиле. <br /> <br /> Обязательно оплатите транзакцию "setApprovalForAll", иначе вы не сможете корректно завершить аукцион!!!</span>
                     </>}
                 </div>
 
