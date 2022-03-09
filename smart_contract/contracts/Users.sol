@@ -258,7 +258,7 @@ contract NFT is ERC721URIStorage {
             abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" height="',
                 uint2str(size),
-                " width="',
+                '" width="',
                 uint2str(size),
                 '">'
             )
