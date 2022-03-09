@@ -2,9 +2,8 @@ import React, { useContext } from "react";
 import { useEffect, useState } from "react";
 import { AuctionContext } from "../../context/AuctionContext";
 
-interface IAuction {
 
-}
+
 
 export const Auctions = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);

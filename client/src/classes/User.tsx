@@ -2,18 +2,9 @@ import React, { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
 import { auctionContract, nftContract } from "../utils/smartContracts";
 import { toEth, toWei } from "../utils/ethFunctions";
+import { AuctionState, IAuctionContent, IAuctionContentRaw } from "../interfaces/IAuction";
+import { auctionFromRaw } from "../utils/AuctionFromRaw";
 const { ethereum } = window as any;
-
-enum AuctionState { Running, Finallized };
-interface AuctionContentI {
-    owner: string;
-    nftTokenId: BigNumber;
-    message: string;
-    startPrice: BigNumber;
-    highestPrice: BigNumber;
-    highestBidder: string;
-    auctionState: AuctionState;
-}
 
 /**
  * User class interact with User smart contract.
@@ -198,7 +189,7 @@ export default class User {
     public createAuction = async (niggaId: number, message: string, startPrice: number): Promise<boolean> => {
         try {
             if (!niggaId || !message || !startPrice) return false;
-            
+
             // Convert niggaIndex to nigga TokenId
             const niggaTokenIdFromIndex =
                 (await this.userContract.getNiggaTokenIdById(niggaId)).toNumber();
@@ -213,17 +204,17 @@ export default class User {
                 return await new Promise(resolve => {
                     this.userContract.on("AuctionCreated", async (auctionId: BigNumber) => {
                         console.log(auctionId);
-                        
+
                         // To approve trasfer NFT we need to approve auction, so
                         // Get approving data
                         const [nftAddress, auctionAddress] = await this.userContract.getAuctionApprovingData(auctionId);
                         // in NFT contract approve transfering nft for auction contract
                         await nftContract(nftAddress).setApprovalForAll(auctionAddress, true);
-    
+
                         this.setIsLoading(false); // Turn off the loader
                         resolve(true);
                     });
-    
+
                 });
             }
 
@@ -257,13 +248,13 @@ export default class User {
         }
     }
 
-    public getAuctionContentById = async (auctionId: number): Promise<AuctionContentI | false> => {
+    public getAuctionContentById = async (auctionId: number): Promise<IAuctionContent | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            let auctionContent: AuctionContentI = await this.userContract.getAuctionContentById(auctionId);
+            let auctionContent: IAuctionContentRaw = await this.userContract.getAuctionContentById(auctionId);
             this.setIsLoading(false); // Turn off the loader
 
-            return auctionContent;
+            return auctionFromRaw(auctionId, auctionContent);
         } catch (error) {
             console.log(error);
             this.setError("Не удалось загрузить список ваших аукционов");
@@ -276,7 +267,7 @@ export default class User {
      * Return list of user's auctions content.
      */
 
-    public getMyAuctionsContent = async (): Promise<AuctionContentI[] | false> => {
+    public getMyAuctionsContent = async (): Promise<IAuctionContent[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
             let auctionsIdsList: number[] | false = await this.getMyAuctionsIds();
@@ -284,7 +275,8 @@ export default class User {
             if (auctionsIdsList) {
                 // For every id get auction content
                 return await Promise.all(auctionsIdsList.map(async (auctionId: number) => {
-                    return await this.getAuctionContentById(auctionId) as AuctionContentI;
+                    const auctionContentRaw: IAuctionContentRaw = await this.getAuctionContentById(auctionId) as unknown as IAuctionContentRaw;
+                    return auctionFromRaw(auctionId, auctionContentRaw);
                 }));
             }
 

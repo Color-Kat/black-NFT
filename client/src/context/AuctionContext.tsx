@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useEth from "../hooks/useEth";
 import User from "../classes/User";
-import { auctionContract, auctionsContract, nftContract, userContract, usersContract } from "../utils/smartContracts";
+import { auctionsContract, nftContract, userContract, usersContract } from "../utils/smartContracts";
+import { toEth } from "../utils/ethFunctions";
+import { IAuctionContent, IAuctionContentRaw } from "../interfaces/IAuction";
+import { auctionFromRaw } from "../utils/AuctionFromRaw";
 
 export const AuctionContext = React.createContext<any>(null);
 
@@ -84,17 +87,19 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     /**
      * get auctions list from blockchain
      */
-    const getAuctions = async () => {
+    const getAuctions = async (): Promise<IAuctionContent[]> => {
         const auctionsAddress = await usersContract().auctionInstance();
         console.log(auctionsAddress);
 
         const auctionsContr = auctionsContract(auctionsAddress);
 
-        let auctions = await auctionsContr.getAuctions();
+        let auctions: IAuctionContent[] = await Promise.all((await auctionsContr.getAuctions()).map(async (auctionAddress: string, auctionId: number) => {
+            // Get raw auction content and
+            const auctionContentRaw: IAuctionContentRaw = await auctionsContr.getContent(auctionId);
+            return auctionFromRaw(auctionId, auctionContentRaw);
+        }));
 
-        console.log(auctions);
-
-
+        return auctions;
     };
 
     return (
