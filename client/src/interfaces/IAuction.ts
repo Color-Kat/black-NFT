@@ -19,6 +19,7 @@ export interface IAuctionContent {
     highestPrice: string; // Price in eth
     message: string;
     nftTokenId: number;
+    nft?: string;
     owner: string;
     startPrice: string; // Price in eth
 }

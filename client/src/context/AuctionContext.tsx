@@ -85,22 +85,35 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     }, [error]);
 
     /**
-     * get auctions list from blockchain
+     * Get auctions list from blockchain
      */
-    const getAuctions = async (): Promise<IAuctionContent[]> => {
-        const auctionsAddress = await usersContract().auctionInstance();
-        console.log(auctionsAddress);
 
+    const getAuctions = async (): Promise<IAuctionContent[]> => {
+        // Get Auctions contract
+        const auctionsAddress = await usersContract().auctionInstance();
         const auctionsContr = auctionsContract(auctionsAddress);
 
         let auctions: IAuctionContent[] = await Promise.all((await auctionsContr.getAuctions()).map(async (auctionAddress: string, auctionId: number) => {
-            // Get raw auction content and
+            // Get raw auction content and format it
             const auctionContentRaw: IAuctionContentRaw = await auctionsContr.getContent(auctionId);
             return auctionFromRaw(auctionId, auctionContentRaw);
         }));
 
         return auctions;
     };
+
+    /**
+     * By nft contract get niggaNFT data by tokenId
+     * @param tokenId 
+     */
+
+    const nftByTokenId = async (tokenId: number) => {
+        const nftAddress = await usersContract().nftInstance();
+        const nftContr = nftContract(nftAddress);
+
+        console.log(await nftContr.tokenURI(tokenId));
+
+    }
 
     return (
         <AuctionContext.Provider
@@ -115,7 +128,8 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 connectUser,
                 user,
 
-                getAuctions
+                getAuctions,
+                nftByTokenId
             }}
         >
             {children}
