@@ -6,6 +6,7 @@ import { auctionsContract, nftContract, userContract, usersContract } from "../u
 import { toEth } from "../utils/ethFunctions";
 import { IAuctionContent, IAuctionContentRaw } from "../interfaces/IAuction";
 import { auctionFromRaw } from "../utils/AuctionFromRaw";
+import { dataURI2string } from "../utils/dataURI2string";
 
 export const AuctionContext = React.createContext<any>(null);
 
@@ -107,12 +108,15 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
      * @param tokenId 
      */
 
-    const nftByTokenId = async (tokenId: number) => {
+    const nftByTokenId = async (tokenId: number): Promise<string> => {
         const nftAddress = await usersContract().nftInstance();
         const nftContr = nftContract(nftAddress);
 
-        console.log(await nftContr.tokenURI(tokenId));
+        // Conver tokenURI to svg string
+        const svgURI: string = JSON.parse(dataURI2string(await nftContr.tokenURI(tokenId))).image;
+        const svg: string = dataURI2string(svgURI, 'data:image/svg+xml;base64,'.length);
 
+        return svg;
     }
 
     return (

@@ -36,7 +36,6 @@ export default class User {
             // And wait for the NiggaCollect event to fire
             return await new Promise<string>((resolve, reject) => {
                 this.userContract.on("NiggaCollect", (niggaTokenURI: string) => {
-                    console.log(niggaTokenURI);
                     this.setIsLoading(false); // Turn off the loader
                     resolve(niggaTokenURI);
                 });

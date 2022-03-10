@@ -2,9 +2,9 @@ import React, { useContext } from "react";
 import { useEffect, useState } from "react";
 import { AuctionContext } from "../../context/AuctionContext";
 import { IAuctionContent } from "../../interfaces/IAuction";
-
-
-
+import Card from "../elements/Card";
+import { shortenAddress } from "../../utils/shortenAddress";
+import { shortenString } from "../../utils/shortenString";
 
 export const Auctions = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +27,10 @@ export const Auctions = ({ }) => {
         setAuctions(auctions);
     }
 
+    const openAuction = () => {
+
+    }
+
     useEffect(() => {
         loadAuctions();
     }, [getAuctions]);
@@ -37,14 +41,19 @@ export const Auctions = ({ }) => {
 
             <span className="text-slate-500 text-lg font-mono">Выбирайте понравившиеся вам лоты, делайте на них ставки! Если ваша ставка будет самой большой, то вам будут переданы права владения негром, который представлен на аукционе.</span>
 
-            <div className="auctions-page__list flex flex-wrap">
+            <div className="auctions-page__list flex flex-wrap mt-5">
                 {auctions.map((auction: IAuctionContent) => {
                     console.log();
 
 
                     return (
                         <div className="auctions-page__card" key={auction.auctionId}>
-
+                            <Card
+                                isActive={false}
+                                niggaSvg={auction.nft}
+                                title={shortenAddress(auction.owner)}
+                                desctiption={shortenString(auction.message)}
+                                onClickCallback={openAuction} />
                         </div>
                     );
                 })}
