@@ -10,7 +10,7 @@ import Card from "../elements/Card";
 
 function ALoader() {
     return (
-        <div>Загрузка</div>
+        <div className="text-3xl text-slate-500 font-bold">Загрузка...</div>
     );
 }
 
