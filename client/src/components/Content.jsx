@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Auctions } from "./pages/Auctions";
+import { Auction } from "./pages/Auction";
 import { CreateAuction } from "./pages/CreateAuction";
 import { FindNigga } from "./pages/FindNigga";
 import { Home } from "./pages/Home";
@@ -12,6 +13,7 @@ export const Content = ({ scrollElement }) => {
                 <Routes>
                     <Route path="/" element={<Home scrollElement={scrollElement} />} />
                     <Route path="/auctions" element={<Auctions />} />
+                    <Route path="/auctions/:auctionId" element={<Auction />} />
                     <Route path="/find" element={<FindNigga />} />
                     <Route path="/create-auction" element={<CreateAuction />} />
                     <Route path="/profile" element={<Profile />} />

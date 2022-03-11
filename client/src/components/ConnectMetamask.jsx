@@ -17,7 +17,6 @@ export const ConnectMetamask = ({ connectWallet }) => {
                     Войдите в свой аккаунт metamask и нажмите "Поехали!"
                 </span>
 
-                {/* <img src="./assets/images/black-lives-matter.png" alt="black lives matter" className="opacity-60 absolute top-0 left-0 w-48" /> */}
             </div>
         </div>
     );

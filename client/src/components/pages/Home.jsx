@@ -19,7 +19,7 @@ export const Home = ({ scrollElement }) => {
                     </span>
                 </div>
                 <div className="introducing-section__right flex justify-center  items-center mb-5 lg:m-0">
-                    <img src="./assets/logo.png" alt="NiggaNft" className="h-48" />
+                    <img src="/assets/logo.png" alt="NiggaNft" className="h-48" />
                 </div>
             </section>
 
@@ -33,7 +33,7 @@ export const Home = ({ scrollElement }) => {
 
             <section className="login-section flex justify-evenly flex-col lg:flex-row py-10 border-b-2 border-slate-600">
                 <div className="login-section__left flex justify-center items-center mb-5 lg:m-0">
-                    <img src="./assets/images/connect.png" alt="connect" className="h-36" />
+                    <img src="/assets/images/connect.png" alt="connect" className="h-36" />
                 </div>
 
                 <div className="login-section__right text-slate-400 max-w-xl">
@@ -55,13 +55,13 @@ export const Home = ({ scrollElement }) => {
                 </div>
 
                 <div className="find-section__right flex justify-center items-center mb-5 lg:m-0">
-                    <img src="./assets/images/jungle.png" alt="jungle" className="h-36" />
+                    <img src="/assets/images/jungle.png" alt="jungle" className="h-36" />
                 </div>
             </section>
 
             <section className="auction-section flex justify-evenly flex-col lg:flex-row py-10 border-b-0 border-slate-600">
                 <div className="auction-section__right flex justify-center items-center mb-5 lg:m-0">
-                    <img src="./assets/images/handcuffs.png" alt="jungle" className="h-36" />
+                    <img src="/assets/images/handcuffs.png" alt="jungle" className="h-36" />
                 </div>
 
                 <div className="auction-section__left text-slate-400 max-w-xl">

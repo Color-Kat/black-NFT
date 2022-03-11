@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 export const Auctions = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
     const [auctions, setAuctions] = useState<IAuctionContent[]>([]);
 
     const { getAuctions, nftByTokenId } = useContext(AuctionContext);
@@ -32,7 +31,7 @@ export const Auctions = ({ }) => {
 
     // Redirect to /auction/:auctionId
     let navigate = useNavigate();
-    const openAuction = (auctionId: number) => { navigate("/auction/" + auctionId); }
+    const openAuction = (auctionId: number) => { navigate("/auctions/" + auctionId); }
 
     useEffect(() => {
         loadAuctions();

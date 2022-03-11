@@ -29,7 +29,7 @@ export const Header = ({ }) => {
         <header className="flex sticky top-0  w-full h-16 bg-slate-800 justify-center text-slate-400 shadow-xl z-10">
             <div className="container flex items-center justify-between px-5 z-30">
                 <HeaderLink to="/">
-                    <img src="./assets/logo.png" alt="" className="h-12" />
+                    <img src="/assets/logo.png" alt="" className="h-12" />
                 </HeaderLink>
 
                 {/* Conputer menu */}

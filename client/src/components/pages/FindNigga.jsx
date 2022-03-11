@@ -83,7 +83,7 @@ export const FindNigga = ({ }) => {
             <div className="find-nigga__container flex flex-col md:flex-row">
                 <div className="find-nigga__left bg-slate-700 px-4 pt-12 pb-6 rounded-2xl shadow-md md:mr-5 flex flex-col items-center">
                     <div className="flex justify-center items-center mb-5 lg:m-0">
-                        <img src={`./assets/images/jungles/jungle_${jungleSlide}.png`} alt="jungle" className="h-36" />
+                        <img src={`/assets/images/jungles/jungle_${jungleSlide}.png`} alt="jungle" className="h-36" />
                     </div>
 
                     {!isLoading
