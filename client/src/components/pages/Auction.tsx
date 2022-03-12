@@ -31,7 +31,9 @@ export const Auction = ({ }) => {
         setIsLoading(false);
     }
 
-
+    const getMinPrice = () => {
+        return auction ? Math.max(+auction.highestPrice, +auction?.startPrice) : 0;
+    }
 
     useEffect(() => {
         loadAuction();
@@ -42,25 +44,56 @@ export const Auction = ({ }) => {
             {(isLoading || !auction)
                 ? <div className="text-3xl text-slate-500 font-bold mt-5">Загрузка...</div>
                 : <div className="flex flex-col md:flex-row justify-between">
-                    <div className="auction-page__left md:border-r-2 pr-8 border-slate-700">
+                    <div className="auction-page__left md:border-r-2 pr-8 border-slate-700 mb-5">
                         <h1 className="auctions-page__title text-4xl text-slate-400 font-bold mb-3">Аукцион №{auction.auctionId}</h1>
 
                         <div
-                            className="nigga-card__image bg-slate-900 no-scrollbar overflow-hidden my-2" // scroll
+                            className="nigga-card__image shadow-md bg-slate-900 no-scrollbar overflow-hidden my-2" // scroll
                             dangerouslySetInnerHTML={{ __html: auction.nft || '' }}
                             style={{ width: '300px', height: '300px' }}
                         ></div>
 
                         <span className="text-slate-500 text-lg font-mono">{auction.message}</span>
-
-
-                        <div className="auctions-page__list flex flex-wrap mt-5">
-
-                        </div>
                     </div>
 
-                    <div className="auction-page__right">
+                    <div className="auction-page__right flex-grow text-slate-500 font-mono md:pl-5 ">
+                        <div className="auction-page__table border-b-2 border-slate-600 pb-2">
+                            <div className="auction-page__table-row flex justify-between w-full flex-wrap">
+                                <div className="auction-page__table-row-title text-2xl font-semibold">Владелец: </div>
+                                <div className="auction-page__table-row-value text-xl leading-8">{shortenAddress(auction.owner)}</div>
+                            </div>
 
+                            <div className="auction-page__table-row flex justify-between w-full flex-wrap">
+                                <div className="auction-page__table-row-title text-2xl font-semibold">Состояние: </div>
+                                <div className="auction-page__table-row-value text-xl leading-8">{['Открыт', 'Завершен'][auction.auctionState - 1]}</div>
+                            </div>
+
+                            <div className="auction-page__table-row flex justify-between w-full flex-wrap">
+                                <div className="auction-page__table-row-title text-2xl font-semibold">№NFT: </div>
+                                <div className="auction-page__table-row-value text-xl leading-8">{auction.nftTokenId}</div>
+                            </div>
+
+                            <div className="auction-page__table-row flex justify-between w-full flex-wrap">
+                                <div className="auction-page__table-row-title text-2xl font-semibold">Стартовая цена: </div>
+                                <div className="auction-page__table-row-value text-xl leading-8">{auction.startPrice} ETH</div>
+                            </div>
+
+                            <div className="auction-page__table-row flex justify-between w-full flex-wrap">
+                                <div className="auction-page__table-row-title text-2xl font-semibold">Наибольшая ставка: </div>
+                                <div className="auction-page__table-row-value text-xl leading-8">{auction.highestPrice} ETH</div>
+                            </div>
+
+                            <div className="auction-page__table-row flex justify-between w-full flex-wrap">
+                                <div className="auction-page__table-row-title text-2xl font-semibold">Владелец наиб.ств.: </div>
+                                <div className="auction-page__table-row-value text-xl leading-8">{shortenAddress(auction.highestBidder)}</div>
+                            </div>
+                        </div>
+
+                        <div className="auction-page__bid">
+                            <h2>Сделать ставку</h2>
+                            <input type="number" min={getMinPrice()} step="0.0001" value={1} />
+                            <button>Отправить</button>
+                        </div>
                     </div>
                 </div>
             }
