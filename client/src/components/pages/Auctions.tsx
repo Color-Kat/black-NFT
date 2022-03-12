@@ -13,8 +13,15 @@ export const Auctions = ({ }) => {
 
     const { getAuctions, nftByTokenId } = useContext(AuctionContext);
 
+    const loadAuctionFromStorage = () => {
+        setAuctions(JSON.parse(localStorage.getItem('auctionsList') || ''));
+    }
+
     const loadAuctions = async () => {
+        loadAuctionFromStorage();
+
         setIsLoading(true);
+
         const auctionsRaw = await getAuctions(); // Get auctions list
 
         // Load nft tokenURI for every auction
@@ -26,6 +33,7 @@ export const Auctions = ({ }) => {
         }));
 
         setAuctions(auctions);
+        localStorage.setItem('auctionsList', JSON.stringify(auctions))
         setIsLoading(false);
     }
 
@@ -43,23 +51,21 @@ export const Auctions = ({ }) => {
 
             <span className="text-slate-500 text-lg font-mono">Выбирайте понравившиеся вам лоты, делайте на них ставки! Если ваша ставка будет самой большой, то вам будут переданы права владения негром, который представлен на аукционе.</span>
 
-            {isLoading
-                ? <div className="text-3xl text-slate-500 font-bold mt-5">Загрузка...</div>
-                : <div className="auctions-page__list flex flex-wrap mt-5">
-                    {auctions.map((auction: IAuctionContent) => {
-                        return (
-                            <div className="auctions-page__card" key={auction.auctionId}>
-                                <Card
-                                    isActive={false}
-                                    niggaSvg={auction.nft}
-                                    title={shortenAddress(auction.owner)}
-                                    desctiption={shortenString(auction.message)}
-                                    onClickCallback={() => { openAuction(auction.auctionId) }} />
-                            </div>
-                        );
-                    })}
-                </div>
-            }
+            {isLoading && <div className="text-3xl text-slate-500 font-bold mt-5">Загрузка...</div>}
+            <div className="auctions-page__list flex flex-wrap mt-5">
+                {auctions.map((auction: IAuctionContent) => {
+                    return (
+                        <div className="auctions-page__card" key={auction.auctionId}>
+                            <Card
+                                isActive={false}
+                                niggaSvg={auction.nft}
+                                title={shortenAddress(auction.owner)}
+                                desctiption={shortenString(auction.message)}
+                                onClickCallback={() => { openAuction(auction.auctionId) }} />
+                        </div>
+                    );
+                })}
+            </div>
 
         </section>
     );

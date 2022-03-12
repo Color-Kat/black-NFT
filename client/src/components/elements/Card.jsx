@@ -1,7 +1,7 @@
 export default ({ isActive, niggaSvg, title, desctiption, onClickCallback }) => {
     return (
         <div
-            className={`realtive mr-2 overflow-hidden rounded-xl cursor-pointer
+            className={`realtive mr-2 overflow-hidden rounded-xl cursor-pointer mb-2
                 ${isActive
                     ? 'hover:bg-gradient-to-b from-gray-700 via-gray-900 to-black bg-gradient-to-bl'
                     : 'bg-gradient-to-tl from-gray-700 via-gray-900 to-black hover:bg-gradient-to-bl'}
