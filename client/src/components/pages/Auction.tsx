@@ -10,23 +10,24 @@ export const Auction = ({ }) => {
     const [error, setError] = useState('');
     const [auction, setAuction] = useState<IAuctionContent>();
 
-    const { } = useContext(AuctionContext);
+    const { getAuction, getSvgByTokenId } = useContext(AuctionContext);
 
     let params = useParams();
     const loadAuction = async () => {
         setIsLoading(true);
+        if (!params.auctionId) return;
 
-        console.log(params);
+        const auctionId = +params.auctionId;
+        const acutionContent = await getAuction(auctionId); // Only content
+        // Content with image svg
+        const auction = {
+            ...acutionContent,
+            nft: await getSvgByTokenId(acutionContent.nftTokenId)
+        }
+        console.log(auction);
 
-        // Load nft tokenURI for every auction
-        // const auctions = await Promise.all(auctionsRaw.map(async (auction: IAuctionContent) => {
-        //     return {
-        //         ...auction,
-        //         nft: await nftByTokenId(auction.nftTokenId)
-        //     }
-        // }));
 
-        // setAuction();
+        setAuction(auction);
         setIsLoading(false);
     }
 
@@ -37,15 +38,30 @@ export const Auction = ({ }) => {
     }, []);
 
     return (
-        <section id="auction-page" className="page">
-            <h1 className="auctions-page__title text-4xl text-slate-400 font-bold mb-3">Аукцион</h1>
-
-            <span className="text-slate-500 text-lg font-mono">Выбирайте понравившиеся вам лоты, делайте на них ставки! Если ваша ставка будет самой большой, то вам будут переданы права владения негром, который представлен на аукционе.</span>
-
-            {isLoading
+        <section id="auction-page" className="page w-full">
+            {(isLoading || !auction)
                 ? <div className="text-3xl text-slate-500 font-bold mt-5">Загрузка...</div>
-                : <div className="auctions-page__list flex flex-wrap mt-5">
+                : <div className="flex flex-col md:flex-row justify-between">
+                    <div className="auction-page__left md:border-r-2 pr-8 border-slate-700">
+                        <h1 className="auctions-page__title text-4xl text-slate-400 font-bold mb-3">Аукцион №{auction.auctionId}</h1>
 
+                        <div
+                            className="nigga-card__image bg-slate-900 no-scrollbar overflow-hidden my-2" // scroll
+                            dangerouslySetInnerHTML={{ __html: auction.nft || '' }}
+                            style={{ width: '300px', height: '300px' }}
+                        ></div>
+
+                        <span className="text-slate-500 text-lg font-mono">{auction.message}</span>
+
+
+                        <div className="auctions-page__list flex flex-wrap mt-5">
+
+                        </div>
+                    </div>
+
+                    <div className="auction-page__right">
+
+                    </div>
                 </div>
             }
 

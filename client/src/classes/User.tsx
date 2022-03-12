@@ -187,7 +187,8 @@ export default class User {
 
     public createAuction = async (niggaId: number, message: string, startPrice: number): Promise<boolean> => {
         try {
-            if (!niggaId || !message || !startPrice) return false;
+            if (!niggaId && niggaId !== 0 || !message || !startPrice) return false;
+
 
             // Convert niggaIndex to nigga TokenId
             const niggaTokenIdFromIndex =

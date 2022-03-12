@@ -81,7 +81,7 @@ export const CreateAuction = ({ }) => {
         console.log(auctionData);
 
         // If something is empty
-        if (!auctionData.niggaId) setError('Вы не выбрали негра');
+        if (!auctionData.niggaId && auctionData.niggaId !== 0) setError('Вы не выбрали негра');
         else if (!auctionData.message) setError('Вы не написали сообщение');
         else if (!auctionData.startPrice || auctionData.startPrice <= 0) setError('Вы должны указать начальную цену');
         else {
@@ -89,10 +89,11 @@ export const CreateAuction = ({ }) => {
             setIsLoading(true);
             setStep(4);
             setError('');
-
+            
             const result = await user.createAuction(auctionData.niggaId, auctionData.message, auctionData.startPrice);
             setIsSuccess(result);
-
+            console.log(result);
+            
             setStep(0);
             setIsLoading(false);
         }

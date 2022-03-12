@@ -11,7 +11,7 @@ export const Auctions = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [auctions, setAuctions] = useState<IAuctionContent[]>([]);
 
-    const { getAuctions, nftByTokenId } = useContext(AuctionContext);
+    const { getAuctions, getSvgByTokenId } = useContext(AuctionContext);
 
     const loadAuctionFromStorage = () => {
         setAuctions(JSON.parse(localStorage.getItem('auctionsList') || ''));
@@ -28,7 +28,7 @@ export const Auctions = ({ }) => {
         const auctions = await Promise.all(auctionsRaw.map(async (auction: IAuctionContent) => {
             return {
                 ...auction,
-                nft: await nftByTokenId(auction.nftTokenId)
+                nft: await getSvgByTokenId(auction.nftTokenId)
             }
         }));
 

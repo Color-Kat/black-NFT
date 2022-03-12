@@ -104,11 +104,26 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
     };
 
     /**
+     * Get auction content from blockchain by auctionId
+     */
+
+    const getAuction = async (auctionId: number): Promise<IAuctionContent> => {
+        // Get Auctions contract
+        const auctionsAddress = await usersContract().auctionInstance();
+        const auctionsContr = auctionsContract(auctionsAddress);
+
+        let auction: IAuctionContent = auctionFromRaw(auctionId,
+            await auctionsContr.getContent(auctionId)
+        );
+        return auction;
+    };
+
+    /**
      * By nft contract get niggaNFT data by tokenId
      * @param tokenId 
      */
 
-    const nftByTokenId = async (tokenId: number): Promise<string> => {
+    const getSvgByTokenId = async (tokenId: number): Promise<string> => {
         const nftAddress = await usersContract().nftInstance();
         const nftContr = nftContract(nftAddress);
 
@@ -133,7 +148,8 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
                 user,
 
                 getAuctions,
-                nftByTokenId
+                getSvgByTokenId,
+                getAuction
             }}
         >
             {children}
