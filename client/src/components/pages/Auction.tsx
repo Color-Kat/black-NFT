@@ -39,6 +39,7 @@ export const Auction = ({ }) => {
         loadAuction();
     }, []);
 
+
     return (
         <section id="auction-page" className="page w-full">
             {(isLoading || !auction)
@@ -89,10 +90,17 @@ export const Auction = ({ }) => {
                             </div>
                         </div>
 
-                        <div className="auction-page__bid">
-                            <h2>Сделать ставку</h2>
-                            <input type="number" min={getMinPrice()} step="0.0001" value={1} />
-                            <button>Отправить</button>
+                        <div className="auction-page__bid max-w-xs flex flex-col">
+                            <h2 className="text-slate-500 font-bold text-3xl my-3">Сделать ставку</h2>
+                            <input
+                                type="number"
+                                min={getMinPrice()}
+                                step="0.0001"
+                                value={''}
+                                placeholder={getMinPrice() + ' ETH'}
+                                className="w-full bg-slate-900 p-3 rounded-lg my-3 border-2 border-slate-700"
+                            />
+                            <button className="self-end w-full py-1.5 px-4 bg-white rounded-lg font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">Отправить</button>
                         </div>
                     </div>
                 </div>
