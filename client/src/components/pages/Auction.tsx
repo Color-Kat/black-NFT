@@ -1,16 +1,20 @@
-import React, { useContext } from "react";
+import React, { ChangeEvent, useContext } from "react";
 import { useEffect, useState } from "react";
 import { AuctionContext } from "../../context/AuctionContext";
 import { IAuctionContent } from "../../interfaces/IAuction";
 import { shortenAddress } from "../../utils/shortenAddress";
 import { useParams } from "react-router-dom";
 
+import Rodal from 'rodal';
+import 'rodal/lib/rodal.css';
+
 export const Auction = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isSuccess, setIsSuccess] = useState<boolean>();
     const [auction, setAuction] = useState<IAuctionContent>();
 
-    const { getAuction, getSvgByTokenId } = useContext(AuctionContext);
+    const { getAuction, getSvgByTokenId, user } = useContext(AuctionContext);
 
     let params = useParams();
     const loadAuction = async () => {
@@ -24,14 +28,12 @@ export const Auction = ({ }) => {
             ...acutionContent,
             nft: await getSvgByTokenId(acutionContent.nftTokenId)
         }
-        console.log(auction);
-
 
         setAuction(auction);
         setIsLoading(false);
     }
 
-    const getMinPrice = () => {
+    const getMinPrice = (): number => {
         return auction ? Math.max(+auction.highestPrice, +auction?.startPrice) : 0;
     }
 
@@ -39,9 +41,30 @@ export const Auction = ({ }) => {
         loadAuction();
     }, []);
 
+    const [bid, setBid] = useState<number>(getMinPrice());
+    const [placeBidLoading, setPlaceBidLoading] = useState(true);
+    const placeBidHandler = async () => {
+        if (!bid || bid <= getMinPrice() || !auction) return;
+        setPlaceBidLoading(true);
+        const result = await user.placeBid(auction.auctionId, bid);
+        setIsSuccess(result);
+        setPlaceBidLoading(false);
+    }
 
     return (
         <section id="auction-page" className="page w-full">
+            {/* RESULT Modal */}
+            <Rodal
+                visible={isSuccess !== undefined} animation="door"
+                onClose={() => { setIsSuccess(undefined) }}
+                customStyles={{ borderRadius: '20px', height: 'max-content', background: `rgb(${isSuccess ? '22 163 74' : '220 38 38'})` }}
+            >
+                <div className={`${isSuccess ? 'bg-green-600' : 'bg-red-600'} p-3`}>
+                    <h3 className="font-bold font-mono text-3xl text-slate-200 mb-2">{isSuccess ? 'Ставка размещена' : 'Не удалось разместить ставку'}</h3>
+                    <span className="font-mono text-xl text-slate-300">{isSuccess ? 'Ваша ставка принята. Когда аукцион завершится, лот будет отдан человеку с максимальной ставкой. Если ваша ставка не будет максимальной, мы вернём вам деньги.' : 'Транзакция не обработана. Попробуйте повторить попытку позже.'}</span>
+                </div>
+            </Rodal>
+
             {(isLoading || !auction)
                 ? <div className="text-3xl text-slate-500 font-bold mt-5">Загрузка...</div>
                 : <div className="flex flex-col md:flex-row justify-between">
@@ -96,11 +119,19 @@ export const Auction = ({ }) => {
                                 type="number"
                                 min={getMinPrice()}
                                 step="0.0001"
-                                value={''}
+                                value={bid}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => setBid(+e.target.value)}
                                 placeholder={getMinPrice() + ' ETH'}
                                 className="w-full bg-slate-900 p-3 rounded-lg my-3 border-2 border-slate-700"
                             />
-                            <button className="self-end w-full py-1.5 px-4 bg-white rounded-lg font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">Отправить</button>
+
+                            {!placeBidLoading
+                                ? <button
+                                    onClick={placeBidHandler}
+                                    className="self-end w-full py-1.5 px-4 bg-white rounded-lg font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg"
+                                >Отправить</button>
+                                : <div className="self-end text-center cursor-default w-full py-1.5 px-4 bg-white rounded-lg font-mono bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">Ожидайте</div>
+                            }
                         </div>
                     </div>
                 </div>
