@@ -7,6 +7,7 @@ import { toEth } from "../utils/ethFunctions";
 import { IAuctionContent, IAuctionContentRaw } from "../interfaces/IAuction";
 import { auctionFromRaw } from "../utils/AuctionFromRaw";
 import { dataURI2string } from "../utils/dataURI2string";
+import { getSvgByTokenId } from "../utils/getSvgByTokenId";
 
 export const AuctionContext = React.createContext<any>(null);
 
@@ -76,8 +77,8 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
 
         // if (user) getAuctions();
         // if (user) console.log(user.finalizeAuction(0));
-
-    }, [user]);
+        connectUser();
+    }, []);
 
     useEffect(() => {
         setTimeout(() => {
@@ -117,22 +118,6 @@ export const AuctionProvider: React.FC = ({ children }: any) => {
         );
         return auction;
     };
-
-    /**
-     * By nft contract get niggaNFT data by tokenId
-     * @param tokenId 
-     */
-
-    const getSvgByTokenId = async (tokenId: number): Promise<string> => {
-        const nftAddress = await usersContract().nftInstance();
-        const nftContr = nftContract(nftAddress);
-
-        // Conver tokenURI to svg string
-        const svgURI: string = JSON.parse(dataURI2string(await nftContr.tokenURI(tokenId))).image;
-        const svg: string = dataURI2string(svgURI, 'data:image/svg+xml;base64,'.length);
-
-        return svg;
-    }
 
     return (
         <AuctionContext.Provider

@@ -1,9 +1,43 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import User, { IMyNigga } from "../../classes/User";
 import { AuctionContext } from "../../context/AuctionContext";
 import { shortenAddress } from "../../utils/shortenAddress";
 
+
+
 export const Profile = ({ }) => {
-    const { currentAccount } = useContext(AuctionContext);
+    const [isLoading_my_niggas, setIsLoading_my_niggas] = useState(false);
+    const [isLoading_my_auctions, setIsLoading_my_auctions] = useState(false);
+    const { currentAccount, user }: { currentAccount: string, user: User } = useContext(AuctionContext);
+
+    const [myNiggas, setMyNiggas] = useState<IMyNigga[]>();
+    const loadMyNiggas = async () => {
+        if (!user) return;
+        setIsLoading_my_niggas(true);
+
+        const myNiggasTokenURIs: IMyNigga[] = await user.getMyNiggasTokenURIs() || [];
+        setMyNiggas(myNiggasTokenURIs);
+
+        setIsLoading_my_niggas(false);
+    }
+
+    const [myAuctions, setMyAuctions] = useState();
+    const loadMyAuctions = async () => {
+        if (!user) return;
+        setIsLoading_my_auctions(true);
+
+        // const myAuctions = await user.getMyAuctionsContent();
+        // console.log(myAuctions);
+
+
+        setIsLoading_my_auctions(false);
+    }
+
+    useEffect(() => {
+        loadMyNiggas();
+        loadMyAuctions();
+
+    }, [user]);
 
     return (
         <section id="profile-page" className="page w-full">

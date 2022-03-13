@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
-import { auctionContract, nftContract } from "../utils/smartContracts";
+import { auctionContract, nftContract, usersContract } from "../utils/smartContracts";
 import { toEth, toWei } from "../utils/ethFunctions";
 import { AuctionState, IAuctionContent, IAuctionContentRaw } from "../interfaces/IAuction";
 import { auctionFromRaw } from "../utils/AuctionFromRaw";
+import { AuctionContext } from "../context/AuctionContext";
+import { getSvgByTokenId } from "../utils/getSvgByTokenId";
 const { ethereum } = window as any;
+
+export interface IMyNigga {
+    tokenId: number;
+    tokenURI: string;
+}
 
 /**
  * User class interact with User smart contract.
@@ -73,25 +80,19 @@ export default class User {
     * Variant 1
     */
 
-    public getMyNiggasTokenURIs = async () => {
+    public getMyNiggasTokenURIs = async (): Promise<IMyNigga[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
-            let myNiggasTokenURIs = await this.userContract.getMyNiggasTokenURI();
-
-
             const tokenIds = await this.getMyNiggasTokenIds();
-            console.log(tokenIds);
 
-            const niggas = (tokenIds || []).map(async (tokenId, index) => {
+            const niggas = await Promise.all<Promise<IMyNigga>>((tokenIds || []).map(async (tokenId) => {
                 return await new Promise(async (resolve) => {
                     resolve({
                         tokenId,
-                        tokenURI: await this.getNiggaURIById(tokenId)
+                        tokenURI: await getSvgByTokenId(tokenId)
                     });
                 })
-            });
-
-            console.log(niggas);
+            }));
 
             this.setIsLoading(false); // Turn off the loader
 
@@ -149,7 +150,7 @@ export default class User {
      * @param niggaId - id of user's nigger, not tokenId
      */
 
-    public getNiggaURIById = async (niggaIndex: number): Promise<string> => {
+    public getNiggaURIByIndex = async (niggaIndex: number): Promise<string> => {
         try {
             const niggasIds = await this.getMyNiggasTokenIds(); // Get tokenIDs of user
             // Convert niggaIndex to nigga TokenId
