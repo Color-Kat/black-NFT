@@ -1,7 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import User, { IMyNigga } from "../../classes/User";
 import { AuctionContext } from "../../context/AuctionContext";
+import { IAuctionContent } from "../../interfaces/IAuction";
 import { shortenAddress } from "../../utils/shortenAddress";
+import { shortenString } from "../../utils/shortenString";
+
+import Card from "../elements/Card";
 
 
 
@@ -21,22 +26,24 @@ export const Profile = ({ }) => {
         setIsLoading_my_niggas(false);
     }
 
-    const [myAuctions, setMyAuctions] = useState();
+    const [myAuctions, setMyAuctions] = useState<(IAuctionContent | false)[]>();
     const loadMyAuctions = async () => {
         if (!user) return;
         setIsLoading_my_auctions(true);
 
-        // const myAuctions = await user.getMyAuctionsContent();
-        // console.log(myAuctions);
-
+        const myAuctions = await user.getMyAuctionsContent() as (IAuctionContent | false)[];
+        setMyAuctions(myAuctions);
 
         setIsLoading_my_auctions(false);
     }
 
+    // Redirect to /auction/:auctionId
+    let navigate = useNavigate();
+    const openAuction = (auctionId: number) => { navigate("/auctions/" + auctionId); }
+
     useEffect(() => {
         loadMyNiggas();
         loadMyAuctions();
-
     }, [user]);
 
     return (
@@ -47,29 +54,21 @@ export const Profile = ({ }) => {
                 <h3 className="text-2xl font-bold text-slate-500 mb-3">Ваши NFT:</h3>
                 <div className="w-full overflow-x-scroll no-scrollbar">
                     <div className="flex">
-                        {/* {myNiggas.map((niggaData, niggaIndex) => {
-                                            const tokenURIBase64 = niggaData.tokenURIBase64;
-                                            const niggaId = niggaData.niggaId;
+                        {myNiggas && myNiggas.map((nigga) => {
+                            const niggaSvg = nigga.tokenURI; // Get svg code of nigga;
+                            const tokenId = nigga.tokenId;
 
-                                            // Get tokenURI in json format
-                                            const niggaTokenURI = JSON.parse(dataURI2string(tokenURIBase64));
-                                            const niggaSvg = dataURI2string(
-                                                niggaTokenURI.image, 'data:image/svg+xml;base64,'.length
-                                            );  // Get svg code of image from json
-
-                                            return (
-                                                <Card
-                                                    key={tokenURIBase64}
-                                                    isActive={auctionData.niggaId === niggaId}
-                                                    niggaSvg={niggaSvg}
-                                                    title={niggaTokenURI.name}
-                                                    desctiption={niggaTokenURI.description}
-                                                    onClickCallback={() => {
-                                                        selectNiggaId(niggaId);
-                                                    }}
-                                                />
-                                            );
-                                        })} */}
+                            return (
+                                <Card
+                                    key={tokenId}
+                                    isActive={false}
+                                    niggaSvg={niggaSvg}
+                                    title="Nigga"
+                                    desctiption="Нигга"
+                                    onClickCallback={() => { }}
+                                />
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -78,7 +77,19 @@ export const Profile = ({ }) => {
                 <h3 className="text-2xl font-bold text-slate-500 mb-3">Ваши аукционы:</h3>
                 <div className="w-full overflow-x-scroll no-scrollbar">
                     <div className="flex">
+                        {myAuctions && myAuctions.map((auction) => {
+                            if (!auction) return;
 
+                            return (
+                                <Card
+                                    key={auction.auctionId}
+                                    isActive={false}
+                                    niggaSvg={auction.nft} // There is empty, don't cate
+                                    title={shortenAddress(auction.owner)}
+                                    desctiption={shortenString(auction.message)}
+                                    onClickCallback={() => { openAuction(auction.auctionId) }} />
+                            );
+                        })}
                     </div>
                 </div>
             </div>

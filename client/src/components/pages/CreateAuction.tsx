@@ -50,7 +50,7 @@ export const CreateAuction = ({ }) => {
             const niggas = await Promise.all((niggasIndexes || []).map(async (niggaIndex: number) => {
                 return {
                     niggaId: niggaIndex, // Save niggaId (niggaIndex)
-                    tokenURIBase64: await user.getNiggaURIById(niggaIndex) // Ans save tokenURI in base64
+                    tokenURIBase64: await user.getNiggaURIByIndex(niggaIndex) // Ans save tokenURI in base64
                 }
             }));
 
@@ -89,11 +89,11 @@ export const CreateAuction = ({ }) => {
             setIsLoading(true);
             setStep(4);
             setError('');
-            
+
             const result = await user.createAuction(auctionData.niggaId, auctionData.message, auctionData.startPrice);
             setIsSuccess(result);
             console.log(result);
-            
+
             setStep(0);
             setIsLoading(false);
         }
@@ -143,8 +143,8 @@ export const CreateAuction = ({ }) => {
                                                     key={tokenURIBase64}
                                                     isActive={auctionData.niggaId === niggaId}
                                                     niggaSvg={niggaSvg}
-                                                    title={niggaTokenURI.name}
-                                                    desctiption={niggaTokenURI.description}
+                                                    title="Nigger"
+                                                    desctiption="Ваш покорный нига"
                                                     onClickCallback={() => {
                                                         selectNiggaId(niggaId);
                                                     }}

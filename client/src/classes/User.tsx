@@ -268,7 +268,7 @@ export default class User {
      * Return list of user's auctions content.
      */
 
-    public getMyAuctionsContent = async (): Promise<IAuctionContent[] | false> => {
+    public getMyAuctionsContent = async (): Promise<(IAuctionContent | false)[] | false> => {
         try {
             this.setIsLoading(true); // Turn on the loader
             let auctionsIdsList: number[] | false = await this.getMyAuctionsIds();
@@ -276,8 +276,7 @@ export default class User {
             if (auctionsIdsList) {
                 // For every id get auction content
                 return await Promise.all(auctionsIdsList.map(async (auctionId: number) => {
-                    const auctionContentRaw: IAuctionContentRaw = await this.getAuctionContentById(auctionId) as unknown as IAuctionContentRaw;
-                    return auctionFromRaw(auctionId, auctionContentRaw);
+                    return await this.getAuctionContentById(auctionId);
                 }));
             }
 
