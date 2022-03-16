@@ -364,7 +364,8 @@ export default class User {
 
             // Check if auction exists and is not finalized
             const auction = await this.getAuctionContentById(auctionId);
-            if (auction && AuctionState.Finallized == auction.auctionState) {
+
+            if (auction && AuctionState.Finallized == auction.auctionState - 1) {
                 this.setError("Такого аукциона не существует");
                 this.setIsLoading(false);
                 return false;

@@ -22,6 +22,7 @@ export const Profile = ({ }) => {
 
         const myNiggasTokenURIs: IMyNigga[] = await user.getMyNiggasTokenURIs() || [];
         setMyNiggas(myNiggasTokenURIs);
+        console.log(myNiggasTokenURIs);
 
         setIsLoading_my_niggas(false);
     }
@@ -32,7 +33,7 @@ export const Profile = ({ }) => {
         setIsLoading_my_auctions(true);
 
         const myAuctions = await user.getMyAuctionsContent() as (IAuctionContent | false)[];
-        setMyAuctions(myAuctions);
+        setMyAuctions(myAuctions.reverse());
 
         setIsLoading_my_auctions(false);
     }
@@ -79,7 +80,6 @@ export const Profile = ({ }) => {
                     <div className="flex">
                         {myAuctions && myAuctions.map((auction) => {
                             if (!auction) return;
-
                             return (
                                 <Card
                                     key={auction.auctionId}

@@ -14,7 +14,7 @@ export const Auction = ({ }) => {
     const [isSuccess, setIsSuccess] = useState<boolean>();
     const [auction, setAuction] = useState<IAuctionContent>();
 
-    const { getAuction, getSvgByTokenId, user } = useContext(AuctionContext);
+    const { getAuction, getSvgByTokenId, user, currentAccount } = useContext(AuctionContext);
 
     let params = useParams();
     const loadAuction = async () => {
@@ -28,9 +28,11 @@ export const Auction = ({ }) => {
             ...acutionContent,
             nft: await getSvgByTokenId(acutionContent.nftTokenId)
         }
-
+        console.log(auction);
+        
         setAuction(auction);
         setIsLoading(false);
+
     }
 
     const getMinPrice = (): number => {
@@ -42,13 +44,23 @@ export const Auction = ({ }) => {
     }, []);
 
     const [bid, setBid] = useState<number>(getMinPrice());
-    const [placeBidLoading, setPlaceBidLoading] = useState(true);
+    const [placeBidLoading, setPlaceBidLoading] = useState(false);
     const placeBidHandler = async () => {
         if (!bid || bid <= getMinPrice() || !auction) return;
         setPlaceBidLoading(true);
         const result = await user.placeBid(auction.auctionId, bid);
         setIsSuccess(result);
         setPlaceBidLoading(false);
+    }
+
+    const [finalizeLoading, setFinalizeLoading] = useState(false);
+    const finalizeAuctionHandler = async () => {
+        if (!auction) return;
+        setFinalizeLoading(true);
+        const result = await user.finalizeAuction(auction.auctionId);
+        console.log(result);
+        
+        setFinalizeLoading(false);
     }
 
     return (
@@ -113,26 +125,43 @@ export const Auction = ({ }) => {
                             </div>
                         </div>
 
-                        <div className="auction-page__bid max-w-xs flex flex-col">
-                            <h2 className="text-slate-500 font-bold text-3xl my-3">Сделать ставку</h2>
-                            <input
-                                type="number"
-                                min={getMinPrice()}
-                                step="0.0001"
-                                value={bid}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => setBid(+e.target.value)}
-                                placeholder={getMinPrice() + ' ETH'}
-                                className="w-full bg-slate-900 p-3 rounded-lg my-3 border-2 border-slate-700"
-                            />
+                        {
+                            auction.owner.toUpperCase() !== currentAccount.toUpperCase()
+                                ? // It's for user, not owner
+                                < div className="auction-page__bid max-w-xs flex flex-col">
+                                    <h2 className="text-slate-500 font-bold text-3xl my-3">Сделать ставку</h2>
+                                    <input
+                                        type="number"
+                                        min={getMinPrice()}
+                                        step="0.0001"
+                                        value={bid}
+                                        onChange={(e: ChangeEvent<HTMLInputElement>) => setBid(+e.target.value)}
+                                        placeholder={getMinPrice() + ' ETH'}
+                                        className="w-full bg-slate-900 p-3 rounded-lg my-3 border-2 border-slate-700"
+                                    />
 
-                            {!placeBidLoading
-                                ? <button
-                                    onClick={placeBidHandler}
-                                    className="self-end w-full py-1.5 px-4 bg-white rounded-lg font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg"
-                                >Отправить</button>
-                                : <div className="self-end text-center cursor-default w-full py-1.5 px-4 bg-white rounded-lg font-mono bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">Ожидайте</div>
-                            }
-                        </div>
+                                    {!placeBidLoading
+                                        ? <button
+                                            onClick={placeBidHandler}
+                                            className="self-end w-full py-1.5 px-4 bg-white rounded-lg font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg"
+                                        >Отправить</button>
+                                        : <div className="self-end text-center cursor-default w-full py-1.5 px-4 bg-white rounded-lg font-mono bg-gradient-to-r from-green-500 to-green-700 text-slate-100  font-bold text-lg">Ожидайте</div>
+                                    }
+                                </div>
+
+                                : // For owner
+                                < div className="auction-page__finalize max-w-xs flex flex-col">
+                                    <h2 className="text-slate-500 font-bold text-3xl my-3">Завершить аукцион</h2>
+
+                                    {!finalizeLoading
+                                        ? <button
+                                            onClick={finalizeAuctionHandler}
+                                            className="self-end w-full py-1.5 px-4 bg-white rounded-lg font-mono hover:scale-105 hover:bg-gradient-to-l bg-gradient-to-r from-pink-500 to-red-500 text-slate-100   font-bold text-lg"
+                                        >Завершить</button>
+                                        : <div className="self-end text-center cursor-default w-full py-1.5 px-4 bg-white rounded-lg font-mono bg-gradient-to-r from-pink-500 to-red-500 text-slate-100   font-bold text-lg">Ожидайте</div>
+                                    }
+                                </div>
+                        }
                     </div>
                 </div>
             }
