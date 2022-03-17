@@ -36,7 +36,7 @@ function App() {
 
             {installMetamask && <InstallMetamask />}
 
-            {!currentAccount && <ConnectMetamask connectWallet={connectWallet} />}
+            {(!installMetamask &&!currentAccount) && <ConnectMetamask connectWallet={connectWallet} />}
 
             {currentAccount && <Main />}
 
@@ -56,7 +56,7 @@ function App() {
             )}
 
             {/* Show loader full screen only if metamask account is not connected */}
-            <LoadingScreen show={ (!currentAccount && isLoading) }/>
+            <LoadingScreen show={ (!currentAccount && isLoading && !installMetamask) }/>
         </div>
     );
 }
